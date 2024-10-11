@@ -11,27 +11,29 @@ Here's a recommended project structure:
 
 ```
 your-project
-├── app
-│   └── api
-│       └── graphql
-│           ├── route.ts
-│           ├── models
-│           │   ├── [your-model].ts
-│           │   └── index.ts
-│           ├── profiles
-│           │   ├── [your-profile].ts
-│           │   └── index.ts
-│           └── hooks
-│               ├── [your-hook].ts
-│               └── index.ts
-└── next.config.js
-└── tsconfig.json
-└── package.json
+├── src
+│   ├── app
+│   │   └── api
+│   │       └── graphql
+│   │           └── route.ts
+│   ├── models
+│   │   ├── [your-model].ts
+│   │   └── index.ts
+│   ├── profiles
+│   │   ├── [your-profile].ts
+│   │   └── index.ts
+│   └── hooks
+│       ├── [your-hook].ts
+│       └── index.ts
+├── next.config.js
+├── tsconfig.json
+├── package.json
 └── ...
 ```
 
 - **app**: Contains your Next.js routes, including your API endpoints.
-- **models**: Houses your Mongoose models.
+  - **api**: Houses your API routes.
+- **models**: Contains your Mongoose models.
 - **profiles**: Stores your access control profiles.
 - **hooks**: Holds pre- and post-event hooks for your models.
 - **next.config.js**: Configures your Next.js application.
@@ -54,16 +56,15 @@ your-project
 
 3. **Create a Route (`app/api/graphql/route.ts`):**
 
-   ```typescript
-   // app/api/graphql/route.ts
+   ```typescript:app/api/graphql/route.ts
    import { startServerAndCreateNextHandler } from '@as-integrations/next';
    import mercury from '@mercury-js/core';
    import { ApolloServer } from '@apollo/server';
    import { makeExecutableSchema } from '@graphql-tools/schema';
    import { applyMiddleware } from 'graphql-middleware';
-   import './models'; // Import your models
-   import './profiles'; // Import your profiles
-   import './hooks'; // Import your hooks
+   import '../../../models'; // Import your models
+   import '../../../profiles'; // Import your profiles
+   import '../../../hooks'; // Import your hooks
 
    // Connect to your MongoDB database
    mercury.connect(process.env.DB_URL || 'mongodb://localhost:27017/mercury');

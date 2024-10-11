@@ -17,7 +17,7 @@ function HomepageHeader() {
         <Heading as="h1" className="hero__title">
           {siteConfig.title}
         </Heading>
-        <p className="hero__subtitle">{siteConfig.tagline}</p>
+        <p className="">{siteConfig.tagline}</p>
 
         <div className={styles.buttons}>
           <Link
@@ -40,7 +40,7 @@ export default function Home(): JSX.Element {
         <HeroBanner />
       </div>
     </body>
-  );
+  ); 
 }
 // <Layout
 //   title={`${siteConfig.tagline}`}
