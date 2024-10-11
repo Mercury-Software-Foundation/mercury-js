@@ -1,0 +1,21 @@
+{
+    "name": "bun",
+    "license": "MIT",
+    "scripts": {
+        "dev": "nodemon --exec bun run index.ts"
+    },
+    "dependencies": {
+        "@apollo/server": "^4.11.0",
+        "@hono/graphql-server": "^0.5.1",
+        "@mercury-js/core": "2.0.0-beta.22",
+        "graphql": "^16.9.0",
+        "graphql-middleware": "^6.1.35",
+        "graphql-tag": "^2.12.6",
+        "graphql-tools": "^9.0.1",
+        "hono": "^4.2.4"
+    },
+    "devDependencies": {
+        "@types/bun": "^1.0.12",
+        "nodemon": "^3.0.1"
+    }
+}

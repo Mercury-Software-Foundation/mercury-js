@@ -1,0 +1,1 @@
+export { AdminProfile } from "./Admin";
