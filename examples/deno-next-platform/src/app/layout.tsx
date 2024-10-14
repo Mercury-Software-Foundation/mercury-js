@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
 import ThemeRegistry from './ThemeRegistry';
+import RecoilProvider from '@/client/RecoilProvider';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -27,7 +28,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <ThemeRegistry options={{ key: 'joy' }}>{children}</ThemeRegistry>
+        <ThemeRegistry options={{ key: 'joy' }}>
+          <RecoilProvider>{children}</RecoilProvider>
+        </ThemeRegistry>
       </body>
     </html>
   );

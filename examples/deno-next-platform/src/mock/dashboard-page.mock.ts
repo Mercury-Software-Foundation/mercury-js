@@ -11,6 +11,11 @@ export default {
     },
     {
       index: 1,
+      component: 'Counter',
+      props: {},
+    },
+    {
+      index: 1,
       component: 'Button',
       props: {
         children: 'Go to Dashboard',

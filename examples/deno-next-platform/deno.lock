@@ -91,6 +91,7 @@
         "npm:next@14.2.15",
         "npm:react-dom@18",
         "npm:react@18",
+        "npm:recoil@~0.7.7",
         "npm:typescript@5"
       ]
     }
