@@ -1,9 +1,12 @@
-import Button from '@mui/joy/Button';
 import Typography from '@mui/joy/Typography';
 
-const components: { [x: string]: React.FC } = {
-  Button: Button,
-  Text: Typography,
+const components = async (): Promise<{ [x: string]: React.FC }> => {
+  const Button = await import('@mui/joy/Button');
+
+  return {
+    Button: Button.default,
+    Text: Typography,
+  };
 };
 
 export default components;

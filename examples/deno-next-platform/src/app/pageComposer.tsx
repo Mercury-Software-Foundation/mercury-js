@@ -1,4 +1,4 @@
-import component from './component';
+import components from './component';
 
 type TPage = {
   index: number;
@@ -6,10 +6,11 @@ type TPage = {
   props: Record<string, unknown>;
 };
 
-export default function ({ page }: { page: TPage[] }) {
+export default async function ({ page }: { page: TPage[] }) {
+  const componentsList = await components();
   return page.map((item) => {
     const { component: componentName, props } = item;
-    const Component = component[componentName];
+    const Component = componentsList[componentName];
     return <Component key={item.index} {...props} />;
   });
 }

@@ -1,4 +1,4 @@
-export default {
+export const dashboardPageMock = {
   path: '/dashboard/home',
   page: [
     {
@@ -23,6 +23,28 @@ export default {
       props: {
         children: 'Go to Profile',
         onClick: 'goToProfile',
+      },
+    },
+  ],
+};
+
+export const loginPageMock = {
+  path: '/login',
+  page: [
+    {
+      index: 0,
+      component: 'Text',
+      props: {
+        level: 'h1',
+        children: 'Login',
+      },
+    },
+    {
+      index: 1,
+      component: 'Button',
+      props: {
+        children: 'Login',
+        onClick: 'login',
       },
     },
   ],
