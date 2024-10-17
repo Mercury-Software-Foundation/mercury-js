@@ -23,7 +23,7 @@ export const File: PModel = {
       type: 'string',
     },
     size: {
-      type: 'number',
+      type: 'float',
     },
     location: {
       type: 'string',
