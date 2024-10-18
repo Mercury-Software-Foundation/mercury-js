@@ -2,7 +2,7 @@
   "name": "@mercury-js/core",
   "description": "Fully automated GrpahQL API generator for your mongoDB models",
   "private": false,
-  "version": "2.0.0-beta.24",
+  "version": "2.0.0-beta.24.1",
   "main": "dist/cjs/mercury.js",
   "module": "dist/esm/mercury.js",
   "types": "dist/esm/src/mercury.d.ts",
