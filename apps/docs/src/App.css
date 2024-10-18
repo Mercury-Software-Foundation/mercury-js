@@ -30,3 +30,47 @@
     font-family: "Manrope-SemiBold";
     src: url("../src/fonts/Manrope-SemiBold.ttf");
   }
+
+  p{
+    margin: 0;
+  }
+
+  h3,h1,h2{
+    margin: 0;
+  }
+
+
+  .img-step-container {
+    height: 300vh; /* Default height for larger screens */
+    --title-mb: 60px;
+    --nav-h: 10px;
+}
+
+.img-step {
+    top: calc(var(--nav-h) + 30px); 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: sticky; 
+    width: 100%;
+    max-height: 550px;
+    height: 50vh; /* Default height for larger screens */
+    padding: 20px;
+    border-radius: 20px;
+    transition: opacity 0.5s ease-in-out; 
+    margin-bottom: 100px;
+}
+
+.img-step img {
+    margin-top: 40px;
+    max-width: 800px;
+    max-height: 400px;
+    overflow: auto;
+}
+
+
+.mercury-gradient {
+  display: inline-block; /* Ensures that the background only covers the text */
+  position: relative;    /* Allows for positioning if needed */
+  transition: background 0.5s ease; /* Smooth transition for background change */
+}
