@@ -19,7 +19,13 @@
       "@mercury-js/core/packages/redis": [
         "packages/core/packages/redis/src/index.ts"
       ],
-      "@mercury-js/platform": ["packages/platform/src/index.ts"]
+      "@mercury-js/platform": ["packages/platform/src/index.ts"],
+      "@mercury-js/plugins": ["packages/plugins/src/index.ts"],
+      "@mercury-js/plugins/historyTracking": [
+        "packages/plugins/historyTracking/src/index.ts"
+      ],
+      "@mercury-js/plugins/redis": ["packages/plugins/redis/src/index.ts"],
+      "@mercuy-js/plugins": ["packages/plugins/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

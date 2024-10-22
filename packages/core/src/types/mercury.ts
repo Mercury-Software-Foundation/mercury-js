@@ -10,15 +10,15 @@ export type TFields = {
 
 export type TField = {
   type:
-    | 'string'
-    | 'number'
-    | 'float'
-    | 'boolean'
-    | 'relationship'
-    | 'enum'
-    | 'virtual'
-    | 'mixed'
-    | 'date';
+  | 'string'
+  | 'number'
+  | 'float'
+  | 'boolean'
+  | 'relationship'
+  | 'enum'
+  | 'virtual'
+  | 'mixed'
+  | 'date';
   ref?: string;
   enum?: Array<string | number>;
   enumType?: string;
@@ -59,3 +59,13 @@ export type TIndexOptions = {
   expireAfterSeconds?: number;
   [key: string]: any;
 };
+
+export interface IPlugin {
+  init(): void;
+  run(): void;
+}
+
+// export type TInit = {
+//   mercury: Mercury,
+//   [x: string]: any
+// }

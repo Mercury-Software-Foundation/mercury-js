@@ -1,0 +1,29 @@
+name: Plugins Release
+
+on:
+  push:
+    branches:
+      - mercury-plugins
+
+jobs:
+  create-github-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Get Version from package.json
+        id: get_version
+        run: echo "VERSION=$(node -p 'require("./packages/plugins/package.json").version')" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          tag_name: "@mercury-js/plugins v${{ steps.get_version.outputs.VERSION }}"
+          release_name: "@mercury-js/plugins v${{ steps.get_version.outputs.VERSION }}"
+          draft: false
+          prerelease: false

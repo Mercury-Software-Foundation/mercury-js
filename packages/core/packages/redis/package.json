@@ -1,8 +1,0 @@
-{
-  "name": "@mercury-js/core/packages/redis",
-  "version": "0.0.1",
-  "dependencies": {},
-  "main": "./index.cjs",
-  "module": "./index.js",
-  "types": "./src/types/core.d.ts"
-}

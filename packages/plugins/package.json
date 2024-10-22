@@ -1,0 +1,12 @@
+{
+  "name": "@mercury-js/plugins",
+  "version": "0.0.1",
+  "dependencies": {},
+  "exports": {
+    "./historyTracking": {
+      "require": "./historyTracking/index.cjs.js",
+      "import": "./historyTracking/index.esm.js",
+      "types": "./historyTracking/index.esm.d.ts"
+    }
+  }
+}
