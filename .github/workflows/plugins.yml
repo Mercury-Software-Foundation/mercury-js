@@ -19,10 +19,17 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       # Install dependencies
-      - run: yarn
+      - run: yarn          
 
       # Build the project (this step replaces the separate build job)
       - run: yarn nx run plugins:build --verbose --skip-nx-cache
+      # Add these steps to your workflow for debugging
+      - name: Check directory structure
+        run: ls -R ./dist/packages/plugins
+        
+      - name: Check npm config
+        run: npm config list
+        
       - run: cd ./dist/packages/plugins && npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
