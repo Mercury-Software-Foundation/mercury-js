@@ -16,6 +16,7 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
+          "cp packages/plugins/package.json dist/packages/plugins/",
           "nx run historyTracking:build",
           "nx run redis:build"
         ],
