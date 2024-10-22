@@ -6,7 +6,29 @@ on:
       - mercury-plugins
 
 jobs:
+  publish-npm:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository to pull the source code
+      - uses: actions/checkout@v4
+
+      # Set up Node.js and specify the version
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      # Install dependencies
+      - run: yarn
+
+      # Build the project (this step replaces the separate build job)
+      - run: yarn nx run plugins:build --verbose --skip-nx-cache
+      - run: cd ./dist/packages/plugins && npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
   create-github-release:
+    needs: publish-npm
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
