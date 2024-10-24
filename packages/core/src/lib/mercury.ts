@@ -1,6 +1,6 @@
 import { merge } from 'lodash';
 import { defaultTypeDefs, defaultResolvers } from './utility';
-import { TModel, TFields, TOptions, THookParams } from '../types';
+import { TModel, TFields, TOptions, THookParams, IPlugin } from '../types';
 
 // import { log, loggerConfig, setLogger, defaultTypeDefs, defaultResolvers, MercuryLogger } from './utility';
 import { mergeTypeDefs, mergeResolvers } from '@graphql-tools/merge';
@@ -44,8 +44,12 @@ export class Mercury {
     await Promise.all(packages.map((pkg) => pkg(this as Mercury)));
   }
 
-  public plugins(plugins: Array<(mercury: Mercury) => void>) {
-    plugins.map((plugin) => plugin(this as Mercury));
+  public plugins(plugins: Array<IPlugin>) {
+    plugins.map((plugin: IPlugin) => {
+      // console.log("Check this mate", plugin)
+      plugin.init();
+      plugin.run();
+    });
   }
 
   public connect(path: string) {

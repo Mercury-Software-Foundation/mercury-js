@@ -1,0 +1,33 @@
+{
+  "name": "plugins",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "release": {
+    "version": {
+      "generatorOptions": {
+        "packageRoot": "dist/{projectRoot}",
+        "currentVersionResolver": "git-tag"
+      }
+    }
+  },
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "mkdir -p dist/packages/plugins",
+          "cp packages/plugins/package.json dist/packages/plugins/",
+          "nx run historyTracking:build",
+          "nx run redis:build"
+        ],
+        "parallel": false
+      }
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/{projectRoot}"
+      }
+    }
+  }
+}
