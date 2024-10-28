@@ -1,4 +1,5 @@
 import { Mercury } from "@mercury-js/core";
+import { TPluginInit, TPluginRun } from './platform';
 
 export interface ISession<T> {
   token: string;
@@ -22,6 +23,8 @@ export type TPasswordPolicyError  = {
 
 export interface IAuth {
   register: <T, K>(user: T) => Promise<K | TPasswordPolicyError>; 
+  init(initParams: TPluginInit): Promise<void>;
+  run(runParams: TPluginRun): Promise<void>;
   login: <T>(username: string, password: string) => Promise<T>;
   logout: (token: string) => Promise<boolean>;
   verify: <T>(token: string) => Promise<T>;

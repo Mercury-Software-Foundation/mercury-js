@@ -95,7 +95,7 @@ export class Platform {
     this._core.connect(this._dbUri);
   }
 
-  async run() {
+  init() {
     this._logger.debug('Loading plugins');
     
     for (const plugin of this._plugins) {
@@ -107,7 +107,11 @@ export class Platform {
       });
     }
   }
-
-  
-    
+  run() {
+    this._logger.debug('Running plugins');
+    this._plugins.forEach((plugin) => {
+      this._logger.debug(`Running plugin: ${plugin.name}`);
+      plugin.run({ core: this.core(plugin.name), logger: this._logger });
+    });
+  }
 }

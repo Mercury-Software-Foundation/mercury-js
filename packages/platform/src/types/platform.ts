@@ -16,7 +16,7 @@ export type TPluginInit = {
 };
 
 export type TPluginRun = {
-  auth: IAuth;
+  core: Promise<Mercury>;
   logger: ILogger;
 };
 

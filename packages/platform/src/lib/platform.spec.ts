@@ -30,7 +30,7 @@ describe('platform', () => {
       ],
     });
     platform.permissions = { pos: { core: true } };
-    platform.run();
+    platform.init();
     expect(coreAsPromise).toBeDefined();
   });
   it('should be able access core only if permitted', async () => {
@@ -56,7 +56,7 @@ describe('platform', () => {
       ],
     });
     platform.permissions = { pos: { core: false } };
-    platform.run();
+    platform.init();
     console.log(coreAsPromise);
     expect(coreAsPromise).rejects.toThrowError('Access Denied');
   });
