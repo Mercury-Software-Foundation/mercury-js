@@ -10,6 +10,16 @@
       "require": "./historyTracking/index.cjs.js",
       "import": "./historyTracking/index.esm.js",
       "types": "./historyTracking/index.esm.d.ts"
+    },
+    "./redis": {
+      "require": "./redis/index.cjs.js",
+      "import": "./redis/index.esm.js",
+      "types": "./redis/index.esm.d.ts"
+    },
+    "./rateLimiter": {
+      "require": "./rateLimiter/index.cjs.js",
+      "import": "./rateLimiter/index.esm.js",
+      "types": "./rateLimiter/index.esm.d.ts"
     }
   }
 }

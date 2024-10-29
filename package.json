@@ -17,7 +17,9 @@
     "graphql": "^16.9.0",
     "graphql-fields": "^2.0.3",
     "graphql-middleware": "^6.1.35",
+    "graphql-rate-limit": "^3.3.0",
     "graphql-scalars": "^1.23.0",
+    "graphql-shield": "^7.6.5",
     "graphql-tools": "^9.0.1",
     "lodash": "^4.17.21",
     "mongoose": "^8.6.3",
@@ -25,6 +27,7 @@
     "prism-react-renderer": "2.3.0",
     "react": "18",
     "react-dom": "18",
+    "redis": "^4.7.0",
     "semver": "^7.6.3",
     "tslib": "^2.7.0"
   },

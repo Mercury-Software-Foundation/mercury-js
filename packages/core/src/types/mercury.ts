@@ -1,3 +1,5 @@
+import type { Mercury } from "../index";
+
 export type TModel = {
   fields: TFields;
   name: string;
@@ -61,7 +63,7 @@ export type TIndexOptions = {
 };
 
 export interface IPlugin {
-  init(): void;
+  init(mercury: Mercury): void;
   run(): void;
 }
 

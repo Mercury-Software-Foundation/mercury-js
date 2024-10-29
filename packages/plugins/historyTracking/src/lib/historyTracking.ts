@@ -5,24 +5,28 @@ import { historySchema } from "./utility";
 import { isEqual } from 'lodash';
 
 export class HistoryTracking implements IPlugin {
-  private mercury: Mercury;
+  public _mercury?: Mercury;
   private installed: boolean;
   private skipModels: string[];
   constructor(options: IHistoryConfig) {
-    this.mercury = options.mercury;
     this.installed = false;
     this.skipModels = options.skipModels ?? [];
   }
 
-  init() {
+  init(mercury: Mercury) {
     // Add a debugger that history tracking package is added
     this.installed = true;
-    // this.mercury = mercury;
+    this._mercury = mercury;
+  }
+
+  private get mercury(): Mercury {
+    if (!this._mercury) throw new Error("Mercury instance is not initialized!");
+    return this._mercury;
   }
 
   run() {
     // Running history tracking plugin and add a logger step for not installed
-    if (!this.installed) throw new Error('History Tracking package is not installed!!');
+    if (!this.installed || !this.mercury) throw new Error('History Tracking package is not installed!!');
     this.createHistory();
   }
 
