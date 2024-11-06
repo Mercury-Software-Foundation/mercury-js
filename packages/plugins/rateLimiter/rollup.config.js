@@ -3,7 +3,7 @@ const { withNx } = require('@nx/rollup/with-nx');
 module.exports = withNx(
   {
     main: './src/index.ts',
-    outputPath: '../../../dist/packages/plugins/redis',
+    outputPath: '../../../dist/packages/plugins/rateLimiter',
     tsConfig: './tsconfig.lib.json',
     compiler: 'tsc',
     format: ['cjs', 'esm'],

@@ -46,8 +46,7 @@ export class Mercury {
 
   public plugins(plugins: Array<IPlugin>) {
     plugins.map((plugin: IPlugin) => {
-      // console.log("Check this mate", plugin)
-      plugin.init();
+      plugin.init(this);
       plugin.run();
     });
   }

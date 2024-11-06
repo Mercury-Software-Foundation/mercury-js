@@ -24,6 +24,9 @@
       "@mercury-js/plugins/historyTracking": [
         "packages/plugins/historyTracking/src/index.ts"
       ],
+      "@mercury-js/plugins/rateLimiter": [
+        "packages/plugins/rateLimiter/src/index.ts"
+      ],
       "@mercury-js/plugins/redis": ["packages/plugins/redis/src/index.ts"],
       "@mercuy-js/plugins": ["packages/plugins/src/index.ts"]
     }
