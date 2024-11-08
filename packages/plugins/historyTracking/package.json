@@ -1,17 +1,11 @@
 {
   "name": "@mercury-js/plugins/historyTracking",
   "version": "0.0.1",
+  "type": "module",
   "dependencies": {
     "lodash": "^4.17.21"
   },
   "publishConfig": {
     "access": "public"
-  },
-  "exports": {
-    "./check": {
-      "require": "./index.cjs",
-      "import": "./index.js",
-      "types": "./index.d.ts"
-    }
   }
 }

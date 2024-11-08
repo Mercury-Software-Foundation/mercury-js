@@ -4,6 +4,7 @@
   "main": "./index.cjs",
   "module": "./index.esm.js",
   "types": "./index.esm.d.ts",
+  "type": "module",
   "publishConfig": {
     "access": "public"
   },
