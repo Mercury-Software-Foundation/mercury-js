@@ -636,13 +636,19 @@ export class Ecommerce {
         if (this.options?.outOfStockQuantity) {
           const qty = this.options.outOfStockQuantity;
           this.options.outOfStockQuantity = undefined;
+          this.options.throwUpdateError = true;
           await thisPlatform.mercury.db.CartItem.update(
             this?.record?.id,
             { quantity: qty },
             this.user,
             this.options
           );
-          throw new GraphQLError(`Quantity exceeds available stock (${qty}).`);
+        }
+        if (this.options.throwUpdateError) {
+          this.options.throwUpdateError = undefined;
+          throw new GraphQLError(
+            `Quantity exceeds available stock (${cartItem.quantity}).`
+          );
         }
       }
     );
