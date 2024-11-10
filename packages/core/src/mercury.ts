@@ -75,6 +75,7 @@ class Mercury {
     const model: TModel = { name, fields, options };
 
     // Execute the CREATE_MODEL hook before creating the model
+    //@ts-ignore
     this.hook.execBefore('CREATE_MODEL', model, (error: any) => {
       if (error) {
         throw error;
