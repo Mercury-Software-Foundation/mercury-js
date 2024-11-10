@@ -611,8 +611,22 @@ export class Ecommerce {
           );
 
           if (quantity > inventory.totalQuantity) {
-            this.options.outOfStockQuantity = inventory.totalQuantity;
-            this.options.outOfStockCartItem = cartItem.id
+            await thisPlatform.mercury.db.CartItem.mongoModel.findByIdAndUpdate(
+              cartItem.id,
+              {
+                quantity: inventory.totalQuantity,
+                amount: (cartItem.priceBookItem.offerPrice || 0) * inventory.totalQuantity
+              },
+              { new: true } 
+            );
+            await recalculateTotalAmountOfCart(
+              cartItem?.cart,
+              thisPlatform.mercury,
+              this.user
+            );
+            throw new GraphQLError(
+              `Quantity exceeds available stock (${inventory.totalQuantity}).`
+            );
           }
           this.options.args.input.amount =
             quantity * cartItem?.priceBookItem?.offerPrice || 0;
@@ -634,25 +648,6 @@ export class Ecommerce {
             this.user
           );
           
-          
-        if (this.options?.outOfStockQuantity) {
-          const qty = this.options.outOfStockQuantity;
-          this.options.outOfStockQuantity = undefined;
-          this.options.throwUpdateError = true;
-          await thisPlatform.mercury.db.CartItem.update(
-            this.options.outOfStockCartItem,
-            { quantity: qty },
-            this.user, {
-              throwUpdateError: true
-            }
-          );
-        }
-        if (this.options.throwUpdateError) {
-          this.options.throwUpdateError = undefined;
-          throw new GraphQLError(
-            `Quantity exceeds available stock (${cartItem.quantity}).`
-          );
-        }
       }
     );
 
