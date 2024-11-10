@@ -2,7 +2,9 @@
   "name": "@mercury-js/plugins/rateLimiter",
   "version": "0.0.1",
   "dependencies": {},
-  "main": "./index.cjs",
-  "module": "./index.js",
-  "type": "module"
+  "type": "module",  
+  "files": [
+    "README.md",
+    "dist"
+  ]
 }

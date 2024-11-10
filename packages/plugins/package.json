@@ -1,6 +1,12 @@
 {
   "name": "@mercury-js/plugins",
-  "version": "0.0.3",
+  "version": "0.0.4",
+  "files": [
+    "README.md",
+    "historyTracking",
+    "redis",
+    "rateLimiter"
+  ],
   "dependencies": {},
   "publishConfig": {
     "access": "public"
