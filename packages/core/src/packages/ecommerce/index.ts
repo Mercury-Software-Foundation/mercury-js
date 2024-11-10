@@ -611,9 +611,7 @@ export class Ecommerce {
           );
 
           if (quantity > inventory.totalQuantity) {
-            throw new GraphQLError(
-              `Quantity exceeds available stock (${inventory.totalQuantity}).`
-            );
+            this.options.outOfStockQuantity = inventory.totalQuantity;
           }
           this.options.args.input.amount =
             quantity * cartItem?.priceBookItem?.offerPrice || 0;
@@ -634,6 +632,17 @@ export class Ecommerce {
             thisPlatform.mercury,
             this.user
           );
+
+        if (this.options.outOfStockQuantity) {
+          const qty = this.options.outOfStockQuantity;
+          this.options.outOfStockQuantity = undefined;
+          await thisPlatform.mercury.db.CartItem.update(
+            this?.record?.id,
+            { quantity: qty },
+            this.user
+          );
+          throw new GraphQLError(`Quantity exceeds available stock (${qty}).`);
+        }
       }
     );
 
@@ -744,7 +753,9 @@ export class Ecommerce {
                     this.user
                   );
                   if (cartItem.quantity > inventory?.totalQuantity) {
-                    `"${cartItem.productItem.name}" quantity exceeds available stock (${inventory.totalQuantity}).`;
+                    throw new GraphQLError(
+                      `"${cartItem.productItem.name}" quantity exceeds available stock (${inventory.totalQuantity}).`
+                    );
                   }
                   if (inventory) {
                     await thisPlatform.mercury.db.Inventory.update(
