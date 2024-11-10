@@ -642,7 +642,9 @@ export class Ecommerce {
           await thisPlatform.mercury.db.CartItem.update(
             this.options.outOfStockCartItem,
             { quantity: qty },
-            this.user
+            this.user, {
+              throwUpdateError: true
+            }
           );
         }
         if (this.options.throwUpdateError) {
