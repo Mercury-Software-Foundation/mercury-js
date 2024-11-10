@@ -106,7 +106,8 @@ export class Ecommerce {
           }
 
       type Query {
-        searchProducts(collectionName: String, searchText: String, sortBy: sortOptions , sortOrder: orderOptions): [SearchResponse]
+        searchProducts(collectionName: String, searchText: String, sortBy: sortOptions , sortOrder: orderOptions): [SearchResponse],
+        checkCartProductsAvailability(cart: String, cartItem: String): String
       }
 
       type SearchResponse{
@@ -244,6 +245,77 @@ export class Ecommerce {
               ]);
             return data;
           },
+          checkCartProductsAvailability: async (
+            root: any,
+            { cart, cartItem }: { cart: string; cartItem: string },
+            ctx: any
+          ) => {
+            if (cart) {
+              try {
+                const cartItems = await this.platform.mercury.db.CartItem.list(
+                  { cart: cart },
+                  ctx.user,
+                  {
+                    populate: [{ path: 'priceBookItem' }],
+                  }
+                );
+                const inventoryCheckPromises = cartItems.map(async (cartItem: any) => {
+                  const inventoryQuery: any = {
+                    product: cartItem.priceBookItem.product,
+                  };
+  
+                  if (cartItem.priceBookItem?.variants?.length) {
+                    inventoryQuery.variants = cartItem.priceBookItem.variants;
+                  }
+  
+                  const inventory = await this.platform.mercury.db.Inventory.get(
+                    inventoryQuery,
+                    ctx.user
+                  );
+                  if (cartItem.quantity > inventory?.totalQuantity) {
+                    throw new GraphQLError(
+                      `Quantity exceeds available stock (${inventory.totalQuantity}).`
+                    );
+                  }
+                });
+                await Promise.all(inventoryCheckPromises);
+                
+              } catch (error: any) {
+                throw new GraphQLError(`${error.message}`);
+              }
+            } else if (cartItem) {
+
+              const cartItemData = await this.platform.mercury.db.CartItem.get(
+                { _id: cartItem },
+                ctx.user,
+                {
+                  populate: [{ path: 'priceBookItem' }],
+                }
+              );
+              const inventoryQuery: any = {
+                product: cartItemData.priceBookItem.product,
+              };
+
+              if (cartItemData.priceBookItem?.variants?.length) {
+                inventoryQuery.variants = cartItemData.priceBookItem.variants;
+              }
+
+              const inventory = await this.platform.mercury.db.Inventory.get(
+                inventoryQuery,
+                ctx.user
+              );
+              if (cartItemData.quantity > inventory?.totalQuantity) {
+                throw new GraphQLError(
+                  `Quantity exceeds available stock (${inventory.totalQuantity}).`
+                );
+              }
+            } else {
+              throw new GraphQLError(
+                'Invalid attempt to purchase. Please provide a valid information.'
+              );
+            }
+            return "Proceed to Payment";
+          }
         },
         Mutation: {
           addCartItem: async (
@@ -577,6 +649,30 @@ export class Ecommerce {
       }
     );
 
+    this.platform.mercury.hook.before(
+      'CREATE_CARTITEM_RECORD',
+      async function (this: any) {
+        const quantity = this.options?.args?.input?.quantity;
+        const priceBookItem = await thisPlatform.mercury.db.PriceBookItem.get(
+          { _id: this.options?.args?.input?.priceBookItem },
+          this.user
+        );
+        const inventory = await thisPlatform.mercury.db.Inventory.get(
+          {
+            product: priceBookItem.product,
+            variants: priceBookItem.variants,
+          },
+          this.user
+        );
+
+        if (quantity > inventory.totalQuantity) {
+          throw new GraphQLError(
+            `Quantity exceeds available stock (${inventory.totalQuantity}).`
+          );
+        }
+      }
+    );
+
     this.platform.mercury.hook.after(
       'DELETE_CARTITEM_RECORD',
       async function (this: any) {
@@ -613,52 +709,56 @@ export class Ecommerce {
                 populate: [{ path: 'priceBookItem' }],
               }
             );
+            try {
             const invoiceLinePromises = cartItems.map(async (cartItem: any) => {
-              await thisPlatform.mercury.db.InvoiceLine.create(
-                {
-                  invoice: invoice.id,
-                  amount: cartItem.amount,
-                  quantity: cartItem.quantity,
-                  productItem: cartItem.productItem,
-                  pricePerUnit: cartItem.amount / (cartItem.quantity || 1),
-                },
-                this.user
-              );
-              await thisPlatform.mercury.db.CartItem.delete(
-                cartItem.id,
-                this.user
-              );
-              
-              const inventoryQuery:any = {
-                product: cartItem.priceBookItem.product,
-              }
-
-              if(cartItem.priceBookItem?.variants?.length){
-                inventoryQuery.variants = cartItem.priceBookItem.variants;
-              }
-
-              const inventory = await thisPlatform.mercury.db.Inventory.get(
-                inventoryQuery,
-                this.user
-              );
-              if (cartItem.quantity > inventory?.totalQuantity) {
-                throw new GraphQLError(
-                  `Quantity exceeds available stock (${inventory.totalQuantity}).`
-                );
-              }
-              if (inventory) {
-                await thisPlatform.mercury.db.Inventory.update(
-                  inventory.id,
+                await thisPlatform.mercury.db.InvoiceLine.create(
                   {
-                    totalQuantity: inventory.totalQuantity - cartItem.quantity,
-                    bookedQuantity:
-                      inventory.bookedQuantity + cartItem.quantity,
+                    invoice: invoice.id,
+                    amount: cartItem.amount,
+                    quantity: cartItem.quantity,
+                    productItem: cartItem.productItem,
+                    pricePerUnit: cartItem.amount / (cartItem.quantity || 1),
                   },
                   this.user
                 );
-              }
-            });
-            await Promise.all(invoiceLinePromises);
+                await thisPlatform.mercury.db.CartItem.delete(
+                  cartItem.id,
+                  this.user
+                );
+
+                const inventoryQuery: any = {
+                  product: cartItem.priceBookItem.product,
+                };
+
+                if (cartItem.priceBookItem?.variants?.length) {
+                  inventoryQuery.variants = cartItem.priceBookItem.variants;
+                }
+
+                const inventory = await thisPlatform.mercury.db.Inventory.get(
+                  inventoryQuery,
+                  this.user
+                );
+                if (cartItem.quantity > inventory?.totalQuantity) {
+                  throw new GraphQLError(
+                    `Quantity exceeds available stock (${inventory.totalQuantity}).`
+                  );
+                }
+                if (inventory) {
+                  await thisPlatform.mercury.db.Inventory.update(
+                    inventory.id,
+                    {
+                      totalQuantity: inventory.totalQuantity - cartItem.quantity,
+                      bookedQuantity:
+                        inventory.bookedQuantity + cartItem.quantity,
+                    },
+                    this.user
+                  );
+                }
+              });
+              await Promise.all(invoiceLinePromises);
+            } catch (error: any) {
+              throw new GraphQLError(`${error.message}`);
+            }
             await thisPlatform.mercury.db.Cart.update(
               cart.id,
               { totalAmount: 0 },
@@ -673,11 +773,11 @@ export class Ecommerce {
               }
             );
 
-            const inventoryQuery:any = {
+            const inventoryQuery: any = {
               product: buyNowCartItem.priceBookItem.product,
-            }
+            };
 
-            if(buyNowCartItem.priceBookItem?.variants?.length){
+            if (buyNowCartItem.priceBookItem?.variants?.length) {
               inventoryQuery.variants = buyNowCartItem.priceBookItem.variants;
             }
 
@@ -694,7 +794,8 @@ export class Ecommerce {
               await thisPlatform.mercury.db.Inventory.update(
                 inventory.id,
                 {
-                  totalQuantity: inventory.totalQuantity - buyNowCartItem.quantity,
+                  totalQuantity:
+                    inventory.totalQuantity - buyNowCartItem.quantity,
                   bookedQuantity:
                     inventory.bookedQuantity + buyNowCartItem.quantity,
                 },
