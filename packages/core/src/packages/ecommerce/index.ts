@@ -740,10 +740,7 @@ export class Ecommerce {
                     },
                     this.user
                   );
-                  await thisPlatform.mercury.db.CartItem.delete(
-                    cartItem.id,
-                    this.user
-                  );
+                  
 
                   const inventoryQuery: any = {
                     product: cartItem.priceBookItem.product,
@@ -774,6 +771,10 @@ export class Ecommerce {
                       this.user
                     );
                   }
+                  await thisPlatform.mercury.db.CartItem.delete(
+                    cartItem.id,
+                    this.user
+                  );
                 }
               );
               await Promise.all(invoiceLinePromises);
