@@ -611,6 +611,8 @@ export class Ecommerce {
           );
 
           if (quantity > inventory.totalQuantity) {
+            console.log("Out of Stock", inventory.totalQuantity, quantity);
+            
             this.options.outOfStockQuantity = inventory.totalQuantity;
           }
           this.options.args.input.amount =
@@ -632,7 +634,8 @@ export class Ecommerce {
             thisPlatform.mercury,
             this.user
           );
-
+          console.log(this.options?.outOfStockQuantity, "------------------");
+          
         if (this.options?.outOfStockQuantity) {
           const qty = this.options.outOfStockQuantity;
           this.options.outOfStockQuantity = undefined;
@@ -644,6 +647,7 @@ export class Ecommerce {
             this.options
           );
         }
+        console.log(this.options?.throwUpdateError, "------------------");
         if (this.options.throwUpdateError) {
           this.options.throwUpdateError = undefined;
           throw new GraphQLError(
