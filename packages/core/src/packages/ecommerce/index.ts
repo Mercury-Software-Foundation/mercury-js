@@ -20,6 +20,7 @@ import {
   Variant,
   VariantGroup,
   Inventory,
+  ProductSeo,
 } from './models';
 import {
   getInvoiceHtml,
@@ -91,6 +92,7 @@ export class Ecommerce {
       Variant,
       VariantGroup,
       Inventory,
+      ProductSeo
     ];
     const modelCreation = models.map((model) => {
       if (!(model.info.name in this.platform.mercury.db))

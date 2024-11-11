@@ -16,3 +16,4 @@ export { Address } from "./Address";
 export { Variant } from "./Variant";
 export { VariantGroup } from "./VariantGroup";
 export { Inventory } from "./Inventory";
+export { ProductSeo } from "./ProductSeo";

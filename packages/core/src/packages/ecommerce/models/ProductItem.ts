@@ -28,6 +28,10 @@ export const ProductItem: PModel = {
       ref: 'File',
       many: true,
     },
+    seo: {
+      type: 'relationship',
+      ref: "ProductSeo"
+    }
   },
   options: {
     historyTracking: false,
