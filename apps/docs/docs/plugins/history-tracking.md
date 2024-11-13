@@ -23,7 +23,7 @@ mercury.createModel('User', UserSchema, { historyTracking: true, recordOwner: tr
 
 - `historyTracking: true` enables history tracking for the specified model.
 
-For more details on the `createModel` method, refer to the [Mercury Documentation](/mercury-js/docs/mercury#4-creating-a-model).
+For more details on the `createModel` method, refer to the [Mercury Documentation](/docs/mercury#4-creating-a-model).
 
 ## Implementation
 
