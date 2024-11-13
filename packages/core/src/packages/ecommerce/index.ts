@@ -471,7 +471,8 @@ export class Ecommerce {
               { email },
               ctx.user
             );
-            if (!customer) {
+            
+            if (!customer?.id) {
               throw new GraphQLError('Invalid email or password');
             }
             const isPasswordValid = await customer.verifyPassword(password);
