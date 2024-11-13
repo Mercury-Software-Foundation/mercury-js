@@ -39,7 +39,7 @@ const Navbar = () => {
       </div>
       <div className="items-center text-white gap-4 justify-start md:flex hidden">
         <a
-          href="/mercury-js/docs/intro"
+          href="/docs/intro"
           style={{
             textDecoration: 'none',
           }}
@@ -104,7 +104,7 @@ const Navbar = () => {
 
               {/* Documentation Link */}
               <a
-                href="/mercury-js/docs/intro"
+                href="/docs/intro"
                 style={{
                   textDecoration: 'none',
                 }}

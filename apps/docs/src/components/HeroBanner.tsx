@@ -156,7 +156,7 @@ const HeroBanner = () => {
           ref={magnetic}
           className="absolute bottom-[18%] lg:right-[15%] right-[8%]"
           onClick={() => {
-            window.open("/mercury-js/docs/intro");
+            window.open("/docs/intro");
           }}
         >
           <div className="relative group">
@@ -177,7 +177,7 @@ const HeroBanner = () => {
         {/* Play Tutorial Section */}
         <div
           className="flex  items-center gap-3 absolute bottom-10 md:left-16 left-6 text-5xl play-tutorial group"
-          onClick={() => window.open("/mercury-js/docs/nextjs")}
+          onClick={() => window.open("/docs/nextjs")}
         >
           <div className="flex flex-row gap-2 items-center justify-center">
             <div className="relative inline-block">

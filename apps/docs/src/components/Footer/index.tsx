@@ -87,7 +87,7 @@ const Footer = () => {
           <div className="flex flex-row lg:justify-end">
             <div className="mt-12 text-white flex flex-col  items-start transition-all delay-300 ease-in-out  ">
               <a
-                href="/mercury-js/docs/intro"
+                href="/docs/intro"
                 className="hover:bg-gradient-to-t from-[#005AB6] to-[#0071E3] rounded-full xl:px-5 py-2.5 flex items-center justify-start gap-2 lg:text-sm text-xl hover:text-white transition-all duration-300 ease-in-out hover:no-underline "
               >
                 <i className="fa-solid fa-file text-[#0071E3] transition-colors duration-300 ease-in-out"></i>
@@ -143,7 +143,7 @@ const Footer = () => {
 
       <div className="flex lg:flex-row gap-5 flex-col justify-between xl:text-[18px]  text-[14px] font-Manrope-Medium tracking-normal text-[#0055AA] bg-[#002040] xl:rounded-full rounded-[18px] px-5 py-4  mt-5 w-[100%]">
         <p className="text-start">
-          Copyright © 2024 Mercury Software Foundation by Vithi
+          Copyright © 2024 Mercury Software Foundation by <a href='https://vithiit.com/' target='_blank' className='italic font-bold'>Vithi</a>
         </p>
         <div className="flex flex-row gap-1">
           <div>
