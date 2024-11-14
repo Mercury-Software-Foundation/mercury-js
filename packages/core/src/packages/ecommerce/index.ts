@@ -849,7 +849,7 @@ export class Ecommerce {
             {
               customer: invoice.customer,
               date: new Date().toISOString(),
-              invoice: invoice.id,
+              invoice: invoice.id
             },
             this.user
           );

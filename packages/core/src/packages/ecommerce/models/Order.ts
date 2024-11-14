@@ -19,6 +19,11 @@ export const Order: PModel = {
       type: 'relationship',
       ref: 'Invoice',
     },
+    orderId: {
+      type: 'string',
+      unique: true,
+      default: () => `OD${Math.floor(10000 + Math.random() * 90000)}`
+    }
   },
   options: {
     historyTracking: false,
