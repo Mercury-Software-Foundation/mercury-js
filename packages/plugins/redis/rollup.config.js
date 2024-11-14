@@ -1,6 +1,9 @@
-const { withNx } = require('@nx/rollup/with-nx');
+import { withNx } from '@nx/rollup/with-nx.js';
+import typescript from '@rollup/plugin-typescript';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 
-module.exports = withNx(
+export default withNx(
   {
     main: './src/index.ts',
     outputPath: '../../../dist/packages/plugins/redis',
@@ -10,8 +13,16 @@ module.exports = withNx(
     assets: [{ input: '.', output: '.', glob: '*.md' }],
   },
   {
-    // Provide additional rollup configuration here. See: https://rollupjs.org/configuration-options
-    // e.g.
-    // output: { sourcemap: true },
+    output: {
+      exports: 'named',
+      interop: 'auto',
+    },
+    external: ['redis'],
+    strictRequires: true,
+    plugins: [
+      commonjs(), 
+      typescript(), 
+      resolve()
+    ],
   }
 );

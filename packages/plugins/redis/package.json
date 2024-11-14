@@ -1,13 +1,12 @@
 {
   "name": "@mercury-js/plugins/redis",
   "version": "0.0.1",
-  "main": "./index.cjs",
-  "module": "./index.esm.js",
-  "types": "./index.esm.d.ts",
+  "type": "module",
+  "files": [
+    "README.md",
+    "dist"
+  ],
   "publishConfig": {
     "access": "public"
-  },
-  "dependencies": {
-    "@mercury-js/core": "^2.0.0-beta.32"
   }
 }

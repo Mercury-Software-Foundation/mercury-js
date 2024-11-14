@@ -1,6 +1,6 @@
 import { IPlugin, Mercury, TModel } from "@mercury-js/core";
 import { IHistoryConfig } from "../types/historyTracking";
-import { Types } from "mongoose";
+import mongoose from "mongoose";
 import { historySchema } from "./utility";
 import { isEqual } from 'lodash';
 
@@ -105,7 +105,7 @@ export class HistoryTracking implements IPlugin {
   }
 
   getInstanceId() {
-    return new Types.ObjectId();
+    return new mongoose.Types.ObjectId();
   }
 
   async createHistoryRecord(
@@ -122,6 +122,7 @@ export class HistoryTracking implements IPlugin {
   ) {
 
     // setting context
+    // Type can be mixed instead of string
     await mercury.db[model].mongoModel.create(
       {
         recordId: recordId,
