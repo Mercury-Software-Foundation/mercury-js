@@ -1,7 +1,7 @@
----
+<!-- ---
 sidebar_position: 4
 title: Getting started with Hono
----
+--- -->
 
 This guide will walk you through setting up a Hono application with `@mercury-js/core`, enabling you to quickly build a robust and secure API backend.
 
