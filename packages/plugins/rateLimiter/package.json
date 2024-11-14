@@ -2,9 +2,13 @@
   "name": "@mercury-js/plugins/rateLimiter",
   "version": "0.0.1",
   "dependencies": {},
-  "type": "module",  
-  "files": [
-    "README.md",
-    "dist"
-  ]
+  "type": "module",
+  "private": true,
+  "peerDependencies": {
+    "graphql-shield": "*",
+    "graphql-middleware": "*",
+    "graphql-rate-limit": "*",
+    "redis": "*",
+    "lodash": "*"
+  }
 }
