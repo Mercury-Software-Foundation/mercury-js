@@ -10,7 +10,7 @@ export class Msg91Adapter implements IMessageService {
   async sendMessage(
     to: { mobileNumber: string; firstName: string; secure_url: string }[],
     templateId: string
-  ): Promise<boolean> {
+  ): Promise<{ success: boolean; message: string }> {
     const options = {
       method: 'POST',
       headers: {
@@ -33,13 +33,16 @@ export class Msg91Adapter implements IMessageService {
         'https://control.msg91.com/api/v5/flow',
         options
       );
-      const data = await response.json();
-    } catch (error) {
+      const data: any = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.message || 'Failed to send email');
+      }
+    } catch (error: any) {
       console.error(error);
-      return false;
+      return error?.message;
     }
 
-    return true;
+    return { success: true, message: 'Sent Successfully!!' };
   }
 
   async sendEmail(
@@ -52,7 +55,7 @@ export class Msg91Adapter implements IMessageService {
     from: { email: string; name: string },
     domain: string,
     templateId: string
-  ): Promise<boolean> {
+  ): Promise<{ success: boolean; message: string }> {
     const options = {
       method: 'POST',
       headers: {
@@ -82,12 +85,15 @@ export class Msg91Adapter implements IMessageService {
         'https://control.msg91.com/api/v5/email/send',
         options
       );
-      const data = await response.json();
-    } catch (error) {
+      const data: any = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.message || 'Failed to send email');
+      }
+    } catch (error: any) {
       console.error(error);
-      return false;
+      return error?.message;
     }
 
-    return true;
+    return { success: true, message: 'Sent Successfully!!' };
   }
 }

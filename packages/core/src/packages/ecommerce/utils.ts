@@ -4,12 +4,20 @@ import type { Mercury } from '../../mercury';
 import cloudinary from 'cloudinary';
 import streamifier from 'streamifier';
 import nodemailer from 'nodemailer';
+import { Msg91Adapter } from './Adapters/MessageService/Msg91Adapter';
 
-
-export const handleAddToCartForExistingCart = async (cartId: string, mercury: Mercury, user: any, productItem: string, priceBookItem: string, quantity: number, productPrice: number) => {
-  const mercuryInstance = mercury.db
+export const handleAddToCartForExistingCart = async (
+  cartId: string,
+  mercury: Mercury,
+  user: any,
+  productItem: string,
+  priceBookItem: string,
+  quantity: number,
+  productPrice: number
+) => {
+  const mercuryInstance = mercury.db;
   if (!cartId) {
-    throw new GraphQLError("Something went wrong")
+    throw new GraphQLError('Something went wrong');
   }
   const cartItem = await mercuryInstance.CartItem.get(
     {
@@ -19,7 +27,7 @@ export const handleAddToCartForExistingCart = async (cartId: string, mercury: Me
     },
     user
   );
-  const newQty = cartItem?.id ? (cartItem.quantity + quantity) : quantity;
+  const newQty = cartItem?.id ? cartItem.quantity + quantity : quantity;
   await mercuryInstance.CartItem.mongoModel.updateOne(
     {
       cart: cartId,
@@ -29,23 +37,29 @@ export const handleAddToCartForExistingCart = async (cartId: string, mercury: Me
     {
       $set: {
         quantity: newQty,
-        amount: (productPrice || 0) * newQty
-      }
+        amount: (productPrice || 0) * newQty,
+      },
     },
     {
-      upsert: true
+      upsert: true,
     }
   );
 
-  await recalculateTotalAmountOfCart(cartId, mercury, user)
-}
+  await recalculateTotalAmountOfCart(cartId, mercury, user);
+};
 
-
-export const recalculateTotalAmountOfCart = async (cart: any, mercury: Mercury, user: any) => {
+export const recalculateTotalAmountOfCart = async (
+  cart: any,
+  mercury: Mercury,
+  user: any
+) => {
   const cartItems = await mercury.db.CartItem.list({ cart }, user);
-  const totalAmount = cartItems.reduce((amount: number, item: any) => amount + item.amount, 0);
+  const totalAmount = cartItems.reduce(
+    (amount: number, item: any) => amount + item.amount,
+    0
+  );
   await mercury.db.Cart.update(cart, { totalAmount }, user);
-}
+};
 
 export const syncAddressIsDefault = async (
   customer: string,
@@ -83,7 +97,6 @@ export const syncAddressIsDefault = async (
 //   await browser.close();
 //   return pdfBuffer;
 // };
-
 
 export const uploadToCloudinary = async (pdfBuffer: any, invoiceId: string) => {
   return new Promise((resolve, reject) => {
@@ -124,46 +137,97 @@ const getTransporter = (senderEmail?: string, password?: string) => {
     },
   });
 };
-export const sendVerificationEmail = async (email: string, invoice: string, senderEmail?: string, password?: string, secure_url?: any, firstName?: string) => {
-  const transporter = getTransporter(senderEmail, password);
-  const mailOptions = {
-    from: senderEmail,
-    to: email,
-    subject: 'Order Confirmation',
-    text: `Your OrderInvoice `,
-    html: getHtml(firstName, secure_url)
+export const sendOrderConfirmationMail = async (
+  email: string,
+  domain: string,
+  emailTemplate: string,
+  senderEmail: string,
+  senderName: string,
+  smsTemplate: string,
+  apiKey: string,
+  secure_url?: any,
+  firstName?: string
+) => {
+  // const transporter = getTransporter(senderEmail, password);
+  // const mailOptions = {
+  //   from: senderEmail,
+  //   to: email,
+  //   subject: 'Order Confirmation',
+  //   text: `Your OrderInvoice `,
+  //   html: getHtml(firstName, secure_url)
+  // };
+  // const info = await transporter.sendMail(mailOptions);
+  const msg91 = new Msg91Adapter(apiKey);
+  const EmailTo = [
+    {
+      email,
+      name: firstName || '',
+      firstName: firstName || '',
+      secure_url: secure_url || '',
+    },
+  ];
+  const EmailFrom = {
+    email: senderEmail,
+    name: senderName,
   };
-  const info = await transporter.sendMail(mailOptions);
+
+  const MessageTo = [
+    {
+      mobileNumber: '',
+      firstName: firstName || '',
+      secure_url: secure_url || '',
+    },
+  ];
+
+  const emailRes = await msg91.sendEmail(
+    EmailTo,
+    EmailFrom,
+    domain,
+    emailTemplate
+  );
+  if (!emailRes.success) {
+    console.error(emailRes.message);
+  }
+  const smsRes = await msg91.sendMessage(MessageTo, smsTemplate);
+  if (!smsRes.success) {
+    console.error(smsRes.message);
+  }
 };
 
-export const getInvoiceHtml = async (invoice: string, mercury: Mercury, user: any, order: string) => {
-  const invoiceData: any = await mercury.db.Invoice.get({ _id: invoice }, user, {
-    populate: [
-      {
-        path: 'customer'
-      },
-      {
-        path: "shippingAddress"
-      },
-      {
-        path: "billingAddress"
-      },
-      {
-        path: "payment"
-      },
-      {
-        path: "invoiceLines",
-        populate: [
-          {
-            path: 'productItem'
-          }
-        ]
-      }
-    ]
-  });
-
-  console.log(invoiceData);
-
+export const getInvoiceHtml = async (
+  invoice: string,
+  mercury: Mercury,
+  user: any,
+  order: string
+) => {
+  const invoiceData: any = await mercury.db.Invoice.get(
+    { _id: invoice },
+    user,
+    {
+      populate: [
+        {
+          path: 'customer',
+        },
+        {
+          path: 'shippingAddress',
+        },
+        {
+          path: 'billingAddress',
+        },
+        {
+          path: 'payment',
+        },
+        {
+          path: 'invoiceLines',
+          populate: [
+            {
+              path: 'productItem',
+            },
+          ],
+        },
+      ],
+    }
+  );
   let html = `<!DOCTYPE html>
   <html lang="en">
    
@@ -271,32 +335,93 @@ export const getInvoiceHtml = async (invoice: string, mercury: Mercury, user: an
   <div>
   <h2 class="section-title">Billed To</h2>
   <p class="font-bold">${invoiceData?.shippingAddress?.name}</p>
-  <p>${invoiceData?.shippingAddress?.street ? `${invoiceData?.shippingAddress?.street},` : ''} ${invoiceData?.shippingAddress?.addressLine1 ? `${invoiceData?.shippingAddress?.addressLine1},` : ''
-    }, </p>
-  <p>${invoiceData?.shippingAddress?.addressLine2 ? `${invoiceData?.shippingAddress?.addressLine2},` : ''} ${invoiceData?.shippingAddress?.landmark ? `${invoiceData?.shippingAddress?.landmark},` : ''
-    }, </p>
-  <p>${invoiceData?.shippingAddress?.city ? `${invoiceData?.shippingAddress?.city},` : ''}${invoiceData?.shippingAddress?.state ? `${invoiceData?.shippingAddress?.state},` : ''
-    }, ${invoiceData?.shippingAddress?.zipCode ? `${invoiceData?.shippingAddress?.zipCode},` : ''}</p>
-  <p>Mobile: ${invoiceData?.shippingAddress?.mobile ? `${invoiceData?.shippingAddress?.mobile},` : ''
-    } </p>
+  <p>${
+    invoiceData?.shippingAddress?.street
+      ? `${invoiceData?.shippingAddress?.street},`
+      : ''
+  } ${
+    invoiceData?.shippingAddress?.addressLine1
+      ? `${invoiceData?.shippingAddress?.addressLine1},`
+      : ''
+  }, </p>
+  <p>${
+    invoiceData?.shippingAddress?.addressLine2
+      ? `${invoiceData?.shippingAddress?.addressLine2},`
+      : ''
+  } ${
+    invoiceData?.shippingAddress?.landmark
+      ? `${invoiceData?.shippingAddress?.landmark},`
+      : ''
+  }, </p>
+  <p>${
+    invoiceData?.shippingAddress?.city
+      ? `${invoiceData?.shippingAddress?.city},`
+      : ''
+  }${
+    invoiceData?.shippingAddress?.state
+      ? `${invoiceData?.shippingAddress?.state},`
+      : ''
+  }, ${
+    invoiceData?.shippingAddress?.zipCode
+      ? `${invoiceData?.shippingAddress?.zipCode},`
+      : ''
+  }</p>
+  <p>Mobile: ${
+    invoiceData?.shippingAddress?.mobile
+      ? `${invoiceData?.shippingAddress?.mobile},`
+      : ''
+  } </p>
   </div>
   <div>
   <h2 class="section-title">Shipped To</h2>
-  <p class="font-bold">${invoiceData?.billingAddress?.name ? `${invoiceData?.billingAddress?.name},` : ''}</p>
-  <p>${invoiceData?.billingAddress?.street ? `${invoiceData?.billingAddress?.street},` : ''}, ${invoiceData?.billingAddress?.addressLine1 ? `${invoiceData?.billingAddress?.addressLine1},` : ''
-    }, </p>
-  <p>${invoiceData?.billingAddress?.addressLine2 ? `${invoiceData?.billingAddress?.addressLine2},` : ''}, ${invoiceData?.billingAddress?.landmark ? `${invoiceData?.billingAddress?.landmark},` : ''
-    }, </p>
-  <p>${invoiceData?.billingAddress?.city ? `${invoiceData?.billingAddress?.city},` : ''}, ${invoiceData?.billingAddress?.state ? `${invoiceData?.billingAddress?.state},` : ''
-    }, ${invoiceData?.billingAddress?.zipCode ? `${invoiceData?.billingAddress?.zipCode},` : ''}</p>
-  <p> Mobile: ${invoiceData?.billingAddress?.mobile ? `${invoiceData?.billingAddress?.mobile},` : ''
-    } </p>
+  <p class="font-bold">${
+    invoiceData?.billingAddress?.name
+      ? `${invoiceData?.billingAddress?.name},`
+      : ''
+  }</p>
+  <p>${
+    invoiceData?.billingAddress?.street
+      ? `${invoiceData?.billingAddress?.street},`
+      : ''
+  }, ${
+    invoiceData?.billingAddress?.addressLine1
+      ? `${invoiceData?.billingAddress?.addressLine1},`
+      : ''
+  }, </p>
+  <p>${
+    invoiceData?.billingAddress?.addressLine2
+      ? `${invoiceData?.billingAddress?.addressLine2},`
+      : ''
+  }, ${
+    invoiceData?.billingAddress?.landmark
+      ? `${invoiceData?.billingAddress?.landmark},`
+      : ''
+  }, </p>
+  <p>${
+    invoiceData?.billingAddress?.city
+      ? `${invoiceData?.billingAddress?.city},`
+      : ''
+  }, ${
+    invoiceData?.billingAddress?.state
+      ? `${invoiceData?.billingAddress?.state},`
+      : ''
+  }, ${
+    invoiceData?.billingAddress?.zipCode
+      ? `${invoiceData?.billingAddress?.zipCode},`
+      : ''
+  }</p>
+  <p> Mobile: ${
+    invoiceData?.billingAddress?.mobile
+      ? `${invoiceData?.billingAddress?.mobile},`
+      : ''
+  } </p>
   </div>
   <div>
   <h2 class="section-title">Invoice Details</h2>
   <p><span class="font-bold">Invoice #:</span> ${invoiceData.id}</p>
-  <p><span class="font-bold">Payment Status:</span> ${invoiceData?.payment?.status
-    }</p>
+  <p><span class="font-bold">Payment Status:</span> ${
+    invoiceData?.payment?.status
+  }</p>
   <p><span class="font-bold">Fulfillment Status:</span> Fulfilled</p>
   </div>
   </div>
@@ -312,16 +437,16 @@ export const getInvoiceHtml = async (invoice: string, mercury: Mercury, user: an
   <span>Total</span>
   </div>
               ${invoiceData?.invoiceLines
-      ?.map(
-        (item: any) => `
+                ?.map(
+                  (item: any) => `
   <div class="grid grid-item">
   <span class="text-blue">${item?.productItem?.name}</span>
   <span>₹ ${item?.pricePerUnit}</span>
   <span>${item?.quantity}</span>
   <span>₹ ${item?.amount || 0}</span>
   </div>`
-      )
-      .join('')}
+                )
+                .join('')}
   </div>
    
           <div class="border-t"></div>
@@ -353,11 +478,10 @@ export const getInvoiceHtml = async (invoice: string, mercury: Mercury, user: an
   </body>
    
   </html>
-  `
+  `;
 
   return html;
-}
-
+};
 
 const getHtml = (firstName?: string, secure_url?: any) => {
   return `<!DOCTYPE html>
@@ -384,6 +508,5 @@ const getHtml = (firstName?: string, secure_url?: any) => {
           </div>
       </div>
   </body>
-  </html>`
-
-}
+  </html>`;
+};

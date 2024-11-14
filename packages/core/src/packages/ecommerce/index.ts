@@ -26,7 +26,7 @@ import {
   getInvoiceHtml,
   handleAddToCartForExistingCart,
   recalculateTotalAmountOfCart,
-  sendVerificationEmail,
+  sendOrderConfirmationMail,
   syncAddressIsDefault,
   uploadPdfBuffer,
 } from './utils';
@@ -37,8 +37,12 @@ import { Invoice } from './models/Invoice';
 import { InvoiceLine } from './models/InvoiceLine';
 
 type Options = {
-  NODEMAILER_EMAIL?: string;
-  NODEMAILER_PASSWORD?: string;
+  SENDER_EMAIL?: string;
+  EMAIL_DOMAIN?: string;
+  SENDER_NAME?: string;
+  EMAIL_TEMPLATE?: string;
+  SMS_TEMPLATE?: string;
+  MSG_API_KEY?: string;
 };
 export interface EcommerceConfig {
   options?: Options;
@@ -861,12 +865,15 @@ export class Ecommerce {
           );
           if (customer && customer.email) {
             // const pdfBuffer = await generatePDF(invoiceHtml);
-            await sendVerificationEmail(
+            await sendOrderConfirmationMail(
               customer.email,
-              invoice.id,
-              ecommerceOptions.NODEMAILER_EMAIL,
-              ecommerceOptions.NODEMAILER_PASSWORD,
-              '',
+              ecommerceOptions.EMAIL_DOMAIN || "",
+              ecommerceOptions.EMAIL_TEMPLATE || "",
+              ecommerceOptions.SENDER_EMAIL || "",
+              ecommerceOptions.SENDER_NAME || "",
+              ecommerceOptions.SMS_TEMPLATE || "",
+              ecommerceOptions.MSG_API_KEY || "",
+              '',              
               customer.firstName
             );
             // const cloudinaryResult: any = await uploadPdfBuffer(pdfBuffer);

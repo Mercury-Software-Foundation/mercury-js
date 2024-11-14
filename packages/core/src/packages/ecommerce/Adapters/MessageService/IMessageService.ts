@@ -2,7 +2,7 @@ export interface IMessageService {
   sendMessage(
     to: { mobileNumber: string; firstName: string; secure_url: string }[],
     templateId: string
-  ): Promise<boolean>;
+  ): Promise<{success: boolean, message: string}>;
   sendEmail(
     to: {
       email: string;
@@ -16,5 +16,5 @@ export interface IMessageService {
     },
     domain: string,
     templateId: string
-  ): Promise<boolean>;
+  ): Promise<{success: boolean, message: string}>;
 }
