@@ -8,9 +8,9 @@ export class HistoryTracking implements IPlugin {
   public _mercury?: Mercury;
   private installed: boolean;
   private skipModels: string[];
-  constructor(options: IHistoryConfig) {
+  constructor(options?: IHistoryConfig) {
     this.installed = false;
-    this.skipModels = options.skipModels ?? [];
+    this.skipModels = options?.skipModels ?? [];
   }
 
   init(mercury: Mercury) {
@@ -136,13 +136,13 @@ export class HistoryTracking implements IPlugin {
     );
   }
 
-  ifStringAndNotNull(value: any): string {
+  ifStringAndNotNull(value: any)  {
     if (value == null || value.length == 0 || value == undefined) {
       value = 'UNKNOWN';
     }
-    if (typeof value !== 'string') {
-      value = value.toString();
-    }
+    // if (typeof value !== 'string') {
+    //   value = value.toString();
+    // }
     return value;
   }
 }
