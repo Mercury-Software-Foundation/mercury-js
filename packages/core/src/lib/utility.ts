@@ -102,11 +102,11 @@ export const historySchema = (name: string): TFields => {
       required: true,
     },
     newValue: {
-      type: 'mixed',
+      type: 'string',
       required: true,
     },
     oldValue: {
-      type: 'mixed', // Mixed
+      type: 'string', // Mixed
       required: true,
     },
   };
