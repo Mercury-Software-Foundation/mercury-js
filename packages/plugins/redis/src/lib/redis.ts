@@ -63,11 +63,11 @@ export class RedisCache implements IPlugin {
   public models: any[];
   // private isInitialized: boolean = false;
 
-    constructor(config: RedisCacheConfig) {
-    this.prefix = config.prefix || "redis";
+    constructor(config?: RedisCacheConfig) {
+    this.prefix = config?.prefix || "redis";
     this.installed = false;
     this.models = [];
-    this.client = createClient(config.client);
+    this.client = createClient(config?.client);
     this.initializeClient();
   }
 
