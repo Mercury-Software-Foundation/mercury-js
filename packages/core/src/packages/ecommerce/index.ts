@@ -867,6 +867,7 @@ export class Ecommerce {
             // const pdfBuffer = await generatePDF(invoiceHtml);
             await sendOrderConfirmationMail(
               customer.email,
+              customer.mobile,
               ecommerceOptions.EMAIL_DOMAIN || "",
               ecommerceOptions.EMAIL_TEMPLATE || "",
               ecommerceOptions.SENDER_EMAIL || "",
@@ -874,7 +875,8 @@ export class Ecommerce {
               ecommerceOptions.SMS_TEMPLATE || "",
               ecommerceOptions.MSG_API_KEY || "",
               '',              
-              customer.firstName
+              customer.firstName,
+              order?.orderId
             );
             // const cloudinaryResult: any = await uploadPdfBuffer(pdfBuffer);
             await thisPlatform.mercury.db.Invoice.update(

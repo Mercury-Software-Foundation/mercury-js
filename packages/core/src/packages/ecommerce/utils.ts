@@ -139,6 +139,7 @@ const getTransporter = (senderEmail?: string, password?: string) => {
 };
 export const sendOrderConfirmationMail = async (
   email: string,
+  mobile: string,
   domain: string,
   emailTemplate: string,
   senderEmail: string,
@@ -146,7 +147,8 @@ export const sendOrderConfirmationMail = async (
   smsTemplate: string,
   apiKey: string,
   secure_url?: any,
-  firstName?: string
+  firstName?: string,
+  order_id?: string
 ) => {
   // const transporter = getTransporter(senderEmail, password);
   // const mailOptions = {
@@ -164,6 +166,7 @@ export const sendOrderConfirmationMail = async (
       name: firstName || '',
       firstName: firstName || '',
       secure_url: secure_url || '',
+      order_id: order_id || ""
     },
   ];
   const EmailFrom = {
@@ -173,9 +176,10 @@ export const sendOrderConfirmationMail = async (
 
   const MessageTo = [
     {
-      mobileNumber: '',
+      mobileNumber: mobile,
       firstName: firstName || '',
       secure_url: secure_url || '',
+      order_id: order_id || ''
     },
   ];
 
