@@ -36,6 +36,10 @@ export const Coupon: PModel = {
     expiryDate: {
       type: 'date',
     },
+    active: {
+      type: "boolean",
+      default: true
+    }
   },
   options: {
     historyTracking: false,

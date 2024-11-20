@@ -435,10 +435,10 @@ export class Ecommerce {
               throw new GraphQLError("Invalid Coupon")
             }
             couponData =couponData[0];
-            if(couponData?.minOrderPrice > amount){
+            if(couponData?.minOrderPrice > amount || !couponData?.active){
               throw new GraphQLError("Coupon not applicable");
             }
-            const discountedAmount = amount - couponData.discountValue;
+            const discountedAmount = couponData.discountValue;
             if(cart){
               await this.platform.mercury.db.Cart.update(cart, {discountedAmount}, ctx.user);
             }
