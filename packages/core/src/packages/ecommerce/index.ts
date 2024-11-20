@@ -395,7 +395,6 @@ export class Ecommerce {
             }
             const hashKey = uuidv4().split('-').join('').substring(0, 8);
             await this.platform.mercury.cache.set(customer?.id, hashKey);
-            await this.platform.mercury.cache.delete(customer.id);
             return hashKey;
           },
           resetPassword: async (
