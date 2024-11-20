@@ -16,10 +16,6 @@ export const Cart: PModel = {
     totalAmount: {
       type: 'float',
     },
-    discountedAmount: {
-      type: 'float',
-      default: 0
-    },
     cartToken: {
       type: 'string',
     },

@@ -23,10 +23,6 @@ export const CartItem: PModel = {
     amount: {
       type: 'number',
     },
-    discountedAmount: {
-      type: 'float',
-      default: 0
-    },
     cart: {
       type: 'relationship',
       ref: 'Cart',

@@ -47,6 +47,7 @@ type Options = {
   MSG_API_KEY?: string;
   INVOICE_PRINT_URL?: string;
   RESET_PASSWORD_OTP_TEMPLATE_EMAIL?: string;
+  JWT_SECRET?: string
 };
 export interface EcommerceConfig {
   options?: Options;
@@ -122,7 +123,7 @@ export class Ecommerce {
         forgotPassword(email: String): String,
         verifyOTP(email: String, otp: String): String,
         resetPassword(email: String, newPassword: String, token:String):String,
-        applyCoupon(coupon:String, cart: String, cartItem: String, amount: Float): String
+        applyCoupon(coupon:String, cart: String, cartItem: String, amount: Float): Float
       }
 
       type SearchResponse{
@@ -439,13 +440,7 @@ export class Ecommerce {
               throw new GraphQLError("Coupon not applicable");
             }
             const discountedAmount = couponData.discountValue;
-            if(cart){
-              await this.platform.mercury.db.Cart.update(cart, {discountedAmount}, ctx.user);
-            }
-            else {
-              await this.platform.mercury.db.CartItem.update(cartItem, {discountedAmount}, ctx.user);
-            }
-            return "Coupon Applied!!"
+            return discountedAmount;
           }
         },
         Mutation: {
@@ -606,7 +601,7 @@ export class Ecommerce {
             }
             const token = jwt.sign(
               { id: customer._id, email: customer.email },
-              'JWT_SECRET',
+              this.options.JWT_SECRET || "",
               { expiresIn: '2d' }
             );
 
