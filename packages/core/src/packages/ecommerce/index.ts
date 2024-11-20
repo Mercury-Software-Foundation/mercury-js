@@ -121,7 +121,8 @@ export class Ecommerce {
         checkCartProductsAvailability(cart: String, cartItem: String): String,
         forgotPassword(email: String): String,
         verifyOTP(email: String, otp: String): String,
-        resetPassword(email: String, newPassword: String, token:String):String
+        resetPassword(email: String, newPassword: String, token:String):String,
+        applyCoupon(coupon:String, cart: String, cartItem: String, amount: Float): String
       }
 
       type SearchResponse{
@@ -428,6 +429,24 @@ export class Ecommerce {
             );
             return 'The password has been reset successfully';
           },
+          applyCoupon: async (root: any, {coupon, cart, cartItem, amount}: {coupon: string, cart: string, cartItem: string, amount: number}, ctx: any) => {
+            let couponData = await this.platform.mercury.db.Coupon.list({code: coupon }, ctx.user);
+            if(!couponData?.length){
+              throw new GraphQLError("Invalid Coupon")
+            }
+            couponData =couponData[0];
+            if(couponData?.minOrderPrice > amount){
+              throw new GraphQLError("Coupon not applicable");
+            }
+            const discountedAmount = amount - couponData.discountValue;
+            if(cart){
+              await this.platform.mercury.db.Cart.update(cart, {discountedAmount}, ctx.user);
+            }
+            else {
+              await this.platform.mercury.db.CartItem.update(cartItem, {discountedAmount}, ctx.user);
+            }
+            return "Coupon Applied!!"
+          }
         },
         Mutation: {
           addCartItem: async (

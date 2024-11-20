@@ -15,6 +15,10 @@ export const Invoice: PModel = {
     totalAmount: {
       type: 'float',
     },
+    discountedAmount: {
+      type: 'float',
+      default: 0
+    },
     shippingAddress: {
       type: 'relationship',
       ref: 'Address',

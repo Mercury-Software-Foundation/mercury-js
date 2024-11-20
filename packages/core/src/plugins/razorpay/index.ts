@@ -39,7 +39,7 @@ class RazorPay {
     this.ecommerce.platform.mercury.addGraphqlSchema(
       `
       type Mutation {
-        initiatePayment(amount: Int, currency: String, shippingAddress: String!, billingAddress: String!, customer: String!): paymentOrder
+        initiatePayment(amount: Float, discountedAmount: Float, currency: String, shippingAddress: String!, billingAddress: String!, customer: String!): paymentOrder
         capturePayment(paymentId: String, razorpayPaymentId: String, razorpayOrderId: String, razorPaySignature: String, cartItem: String): String
       }
 
@@ -57,7 +57,7 @@ class RazorPay {
     `,
       {
         Mutation: {
-          initiatePayment: async (root: any, { amount, currency, shippingAddress, billingAddress, customer }: { amount: number; currency: string, shippingAddress: string, billingAddress: string, customer: string }, ctx: any) => {
+          initiatePayment: async (root: any, { amount, discountedAmount, currency, shippingAddress, billingAddress, customer }: { amount: number;discountedAmount: number; currency: string, shippingAddress: string, billingAddress: string, customer: string }, ctx: any) => {
             try {
               const order = this.razorPay.orders.create({
                 amount: amount * 100,
@@ -80,6 +80,7 @@ class RazorPay {
                 billingAddress,
                 shippingAddress,
                 totalAmount: amount,
+                discountedAmount,
                 payment: payment.id,
                 status: "Pending"
               }, ctx.user);
