@@ -35,6 +35,7 @@ import { GraphQLError } from 'graphql';
 import jwt from 'jsonwebtoken';
 import { Invoice } from './models/Invoice';
 import { InvoiceLine } from './models/InvoiceLine';
+import { Msg91Adapter } from './Adapters/MessageService/Msg91Adapter';
 
 type Options = {
   SENDER_EMAIL?: string;
@@ -43,6 +44,8 @@ type Options = {
   EMAIL_TEMPLATE?: string;
   SMS_TEMPLATE?: string;
   MSG_API_KEY?: string;
+  INVOICE_PRINT_URL?: string;
+  RESET_PASSWORD_OTP_TEMPLATE_EMAIL?: string;
 };
 export interface EcommerceConfig {
   options?: Options;
@@ -96,7 +99,7 @@ export class Ecommerce {
       Variant,
       VariantGroup,
       Inventory,
-      ProductSeo
+      ProductSeo,
     ];
     const modelCreation = models.map((model) => {
       if (!(model.info.name in this.platform.mercury.db))
@@ -113,7 +116,8 @@ export class Ecommerce {
 
       type Query {
         searchProducts(collectionName: String, searchText: String, sortBy: sortOptions , sortOrder: orderOptions): [SearchResponse],
-        checkCartProductsAvailability(cart: String, cartItem: String): String
+        checkCartProductsAvailability(cart: String, cartItem: String): String,
+        forgotPassword(email: String): String
       }
 
       type SearchResponse{
@@ -326,6 +330,45 @@ export class Ecommerce {
             }
             return 'Proceed to Payment';
           },
+          forgotPassword: async (
+            root: any,
+            { email }: { email: string },
+            ctx: any
+          ) => {
+            const mercuryDBInstance = this.platform.mercury.db;
+            const customer = await mercuryDBInstance.Customer.get(
+              { email },
+              ctx.user
+            );
+            if (!customer?.id) {
+              throw new GraphQLError('User not found');
+            }
+            const otp = Math.floor(1000 + Math.random() * 9000).toString();
+            this.platform.mercury.cache.set(customer?.id, otp);
+            const msg91 = new Msg91Adapter(this.options.MSG_API_KEY || "");
+            const EmailTo = [
+              {
+                email,
+                name: customer.firstName || '',
+                otp: otp
+              },
+            ];
+            const EmailFrom = {
+              email: this.options.SENDER_EMAIL,
+              name: this.options.SENDER_NAME,
+            };
+
+            const emailRes = await msg91.sendEmail(
+              EmailTo,
+              EmailFrom,
+              this.options.EMAIL_DOMAIN || "",
+              this.options.RESET_PASSWORD_OTP_TEMPLATE_EMAIL || ""
+            );
+            if (!emailRes.success) {
+              console.error(emailRes.message);
+            }
+            return 'OTP has been sent successfully';
+          },
         },
         Mutation: {
           addCartItem: async (
@@ -475,7 +518,7 @@ export class Ecommerce {
               { email },
               ctx.user
             );
-            
+
             if (!customer?.id) {
               throw new GraphQLError('Invalid email or password');
             }
@@ -622,9 +665,11 @@ export class Ecommerce {
               cartItem.id,
               {
                 quantity: inventory.totalQuantity,
-                amount: (cartItem.priceBookItem.offerPrice || 0) * inventory.totalQuantity
+                amount:
+                  (cartItem.priceBookItem.offerPrice || 0) *
+                  inventory.totalQuantity,
               },
-              { new: true } 
+              { new: true }
             );
             await recalculateTotalAmountOfCart(
               cartItem?.cart,
@@ -654,7 +699,6 @@ export class Ecommerce {
             thisPlatform.mercury,
             this.user
           );
-          
       }
     );
 
@@ -747,7 +791,6 @@ export class Ecommerce {
                     },
                     this.user
                   );
-                  
 
                   const inventoryQuery: any = {
                     product: cartItem.priceBookItem.product,
@@ -858,24 +901,24 @@ export class Ecommerce {
             { _id: invoice.customer },
             this.user
           );
-          const invoiceHtml = await getInvoiceHtml(
-            invoice.id,
-            thisPlatform.mercury,
-            this.user,
-            order.id
-          );
+          // const invoiceHtml = await getInvoiceHtml(
+          //   invoice.id,
+          //   thisPlatform.mercury,
+          //   this.user,
+          //   order.id
+          // );
           if (customer && customer.email) {
             // const pdfBuffer = await generatePDF(invoiceHtml);
             await sendOrderConfirmationMail(
               customer.email,
               customer.mobile,
-              ecommerceOptions.EMAIL_DOMAIN || "",
-              ecommerceOptions.EMAIL_TEMPLATE || "",
-              ecommerceOptions.SENDER_EMAIL || "",
-              ecommerceOptions.SENDER_NAME || "",
-              ecommerceOptions.SMS_TEMPLATE || "",
-              ecommerceOptions.MSG_API_KEY || "",
-              '',              
+              ecommerceOptions.EMAIL_DOMAIN || '',
+              ecommerceOptions.EMAIL_TEMPLATE || '',
+              ecommerceOptions.SENDER_EMAIL || '',
+              ecommerceOptions.SENDER_NAME || '',
+              ecommerceOptions.SMS_TEMPLATE || '',
+              ecommerceOptions.MSG_API_KEY || '',
+              ecommerceOptions.INVOICE_PRINT_URL || '',
               customer.firstName,
               order?.orderId
             );

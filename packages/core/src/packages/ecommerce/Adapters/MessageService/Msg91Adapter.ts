@@ -9,7 +9,7 @@ export class Msg91Adapter implements IMessageService {
   }
 
   async sendMessage(
-    to: { mobileNumber: string; firstName: string; secure_url: string }[],
+    to: { mobileNumber: string; [x: string]: any; }[],
     templateId: string
   ): Promise<{ success: boolean; message: string }> {
     const options = {
@@ -45,10 +45,9 @@ export class Msg91Adapter implements IMessageService {
     to: {
       email: string;
       name: string;
-      firstName: string;
-      secure_url: string;
+      [x: string]: any;
     }[],
-    from: { email: string; name: string },
+    from: { email?: string; name?: string },
     domain: string,
     templateId: string
   ): Promise<{ success: boolean; message: string }> {
