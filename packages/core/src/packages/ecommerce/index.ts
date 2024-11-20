@@ -123,7 +123,7 @@ export class Ecommerce {
         forgotPassword(email: String): String,
         verifyOTP(email: String, otp: String): String,
         resetPassword(email: String, newPassword: String, token:String):String,
-        applyCoupon(coupon:String, cart: String, cartItem: String, amount: Float): Float
+        applyCoupon(coupon:String, amount: Float): Float
       }
 
       type SearchResponse{
@@ -430,7 +430,7 @@ export class Ecommerce {
             );
             return 'The password has been reset successfully';
           },
-          applyCoupon: async (root: any, {coupon, cart, cartItem, amount}: {coupon: string, cart: string, cartItem: string, amount: number}, ctx: any) => {
+          applyCoupon: async (root: any, {coupon, amount}: {coupon: string, amount: number}, ctx: any) => {
             let couponData = await this.platform.mercury.db.Coupon.list({code: coupon }, ctx.user);
             if(!couponData?.length){
               throw new GraphQLError("Invalid Coupon")
