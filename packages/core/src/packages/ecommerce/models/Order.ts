@@ -23,6 +23,12 @@ export const Order: PModel = {
       type: 'string',
       unique: true,
       default: () => `OD${Math.floor(10000 + Math.random() * 90000)}`
+    },
+    shipmentStatus: {
+      type: "enum",
+      enumType: "string",
+      enum: ["IN_TRANSIT", "PACKAGING", "DISPATCH", "DELIVERED"],
+      default: "PACKAGING"
     }
   },
   options: {

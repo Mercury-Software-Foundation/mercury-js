@@ -344,7 +344,8 @@ export class Ecommerce {
               throw new GraphQLError('User not found');
             }
             const otp = Math.floor(1000 + Math.random() * 9000).toString();
-            this.platform.mercury.cache.set(customer?.id, otp);
+            
+            await this.platform.mercury.cache.set(customer?.id, otp);
             const msg91 = new Msg91Adapter(this.options.MSG_API_KEY || "");
             const EmailTo = [
               {

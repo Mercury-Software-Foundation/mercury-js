@@ -68,6 +68,8 @@ export class Msg91Adapter implements IMessageService {
             variables: {
               firstName: recipient.firstName,
               secure_url: recipient.secure_url,
+              otp: recipient?.otp,
+              order_id: recipient?.order_id
             },
           })),
           from: {
