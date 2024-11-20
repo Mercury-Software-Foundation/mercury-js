@@ -21,6 +21,7 @@ import {
   VariantGroup,
   Inventory,
   ProductSeo,
+  CouponFormula,
 } from './models';
 import {
   getInvoiceHtml,
@@ -100,6 +101,7 @@ export class Ecommerce {
       VariantGroup,
       Inventory,
       ProductSeo,
+      CouponFormula,
     ];
     const modelCreation = models.map((model) => {
       if (!(model.info.name in this.platform.mercury.db))
@@ -117,7 +119,9 @@ export class Ecommerce {
       type Query {
         searchProducts(collectionName: String, searchText: String, sortBy: sortOptions , sortOrder: orderOptions): [SearchResponse],
         checkCartProductsAvailability(cart: String, cartItem: String): String,
-        forgotPassword(email: String): String
+        forgotPassword(email: String): String,
+        verifyOTP(email: String, otp: String): String,
+        resetPassword(email: String, newPassword: String, token:String):String
       }
 
       type SearchResponse{
@@ -344,14 +348,14 @@ export class Ecommerce {
               throw new GraphQLError('User not found');
             }
             const otp = Math.floor(1000 + Math.random() * 9000).toString();
-            
+
             await this.platform.mercury.cache.set(customer?.id, otp);
-            const msg91 = new Msg91Adapter(this.options.MSG_API_KEY || "");
+            const msg91 = new Msg91Adapter(this.options.MSG_API_KEY || '');
             const EmailTo = [
               {
                 email,
                 name: customer.firstName || '',
-                otp: otp
+                otp: otp,
               },
             ];
             const EmailFrom = {
@@ -362,13 +366,68 @@ export class Ecommerce {
             const emailRes = await msg91.sendEmail(
               EmailTo,
               EmailFrom,
-              this.options.EMAIL_DOMAIN || "",
-              this.options.RESET_PASSWORD_OTP_TEMPLATE_EMAIL || ""
+              this.options.EMAIL_DOMAIN || '',
+              this.options.RESET_PASSWORD_OTP_TEMPLATE_EMAIL || ''
             );
             if (!emailRes.success) {
               console.error(emailRes.message);
             }
             return 'OTP has been sent successfully';
+          },
+          verifyOTP: async (
+            root: any,
+            { email, otp }: { email: string; otp: string },
+            ctx: any
+          ) => {
+            const mercuryDBInstance = this.platform.mercury.db;
+            const customer = await mercuryDBInstance.Customer.get(
+              { email },
+              ctx.user
+            );
+            if (!customer?.id) {
+              throw new GraphQLError('User not found');
+            }
+            const storedOTP = await this.platform.mercury.cache.get(
+              customer?.id
+            );
+            if (storedOTP !== otp) {
+              throw new GraphQLError('Invalid OTP');
+            }
+            const hashKey = uuidv4().split('-').join('').substring(0, 8);
+            await this.platform.mercury.cache.set(customer?.id, hashKey);
+            await this.platform.mercury.cache.delete(customer.id);
+            return hashKey;
+          },
+          resetPassword: async (
+            root: any,
+            {
+              email,
+              newPassword,
+              token,
+            }: { email: string; newPassword: string; token: string },
+            ctx: any
+          ) => {
+            const mercuryDBInstance = this.platform.mercury.db;
+            const customer = await mercuryDBInstance.Customer.get(
+              { email },
+              ctx.user
+            );
+            if (!customer?.id) {
+              throw new GraphQLError('User not found');
+            }
+            const tokenRedis = await this.platform.mercury.cache.get(
+              customer?.id
+            );
+            await this.platform.mercury.cache.delete(customer?.id);
+            if (token !== tokenRedis) {
+              throw new GraphQLError('Invalid token');
+            }
+            await mercuryDBInstance.Customer.update(
+              customer.id,
+              { password: newPassword },
+              ctx.user
+            );
+            return 'The password has been reset successfully';
           },
         },
         Mutation: {
@@ -894,7 +953,7 @@ export class Ecommerce {
               customer: invoice.customer,
               date: new Date().toISOString(),
               invoice: invoice.id,
-              orderId: `OD${Math.floor(10000 + Math.random() * 90000)}`
+              orderId: `OD${Math.floor(10000 + Math.random() * 90000)}`,
             },
             this.user
           );

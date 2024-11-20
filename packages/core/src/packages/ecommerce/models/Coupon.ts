@@ -6,6 +6,7 @@ export const Coupon: PModel = {
     description: 'Coupon model',
     managed: true,
     prefix: 'COUPON',
+    key: 'code'
   },
   fields: {
     code: {
@@ -24,6 +25,10 @@ export const Coupon: PModel = {
     },
     minOrderPrice: {
       type: 'number',
+    },
+    formula: {
+      type: "relationship",
+      ref: "CouponFormula"
     },
     expiryDate: {
       type: 'date',

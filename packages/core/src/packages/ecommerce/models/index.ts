@@ -17,3 +17,4 @@ export { Variant } from "./Variant";
 export { VariantGroup } from "./VariantGroup";
 export { Inventory } from "./Inventory";
 export { ProductSeo } from "./ProductSeo";
+export { CouponFormula } from "./CouponFormula";
