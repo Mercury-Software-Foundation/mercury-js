@@ -18,6 +18,7 @@ export const Coupon: PModel = {
       type: 'enum',
       enum: ['PERCENTAGE', 'FIXED_AMOUNT'],
       enumType: 'string',
+      default: "FIXED_AMOUNT"
     },
     discountValue: {
       type: 'number',
