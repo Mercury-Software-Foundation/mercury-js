@@ -918,7 +918,7 @@ export class Ecommerce {
               ecommerceOptions.SENDER_NAME || '',
               ecommerceOptions.SMS_TEMPLATE || '',
               ecommerceOptions.MSG_API_KEY || '',
-              ecommerceOptions.INVOICE_PRINT_URL || '',
+              `${ecommerceOptions.INVOICE_PRINT_URL}?id=${order?.id}` || '',
               customer.firstName,
               order?.orderId
             );
