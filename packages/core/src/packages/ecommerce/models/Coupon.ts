@@ -11,6 +11,8 @@ export const Coupon: PModel = {
   fields: {
     code: {
       type: 'string',
+      unique: true,
+      required: true
     },
     discountType: {
       type: 'enum',
