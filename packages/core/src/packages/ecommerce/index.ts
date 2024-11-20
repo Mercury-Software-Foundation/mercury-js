@@ -47,7 +47,7 @@ type Options = {
   MSG_API_KEY?: string;
   INVOICE_PRINT_URL?: string;
   RESET_PASSWORD_OTP_TEMPLATE_EMAIL?: string;
-  JWT_SECRET?: string
+  JWT_SECRET?: string;
 };
 export interface EcommerceConfig {
   options?: Options;
@@ -344,7 +344,7 @@ export class Ecommerce {
             const mercuryDBInstance = this.platform.mercury.db;
             const customer = await mercuryDBInstance.Customer.get(
               { email },
-              ctx.user
+              { id: '1', profile: 'SystemAdmin' }
             );
             if (!customer?.id) {
               throw new GraphQLError('User not found');
@@ -384,7 +384,7 @@ export class Ecommerce {
             const mercuryDBInstance = this.platform.mercury.db;
             const customer = await mercuryDBInstance.Customer.get(
               { email },
-              ctx.user
+              { id: '1', profile: 'SystemAdmin' }
             );
             if (!customer?.id) {
               throw new GraphQLError('User not found');
@@ -411,7 +411,7 @@ export class Ecommerce {
             const mercuryDBInstance = this.platform.mercury.db;
             const customer = await mercuryDBInstance.Customer.get(
               { email },
-              ctx.user
+              { id: '1', profile: 'SystemAdmin' }
             );
             if (!customer?.id) {
               throw new GraphQLError('User not found');
@@ -426,22 +426,29 @@ export class Ecommerce {
             await mercuryDBInstance.Customer.update(
               customer.id,
               { password: newPassword },
-              ctx.user
+              { id: '1', profile: 'SystemAdmin' }
             );
             return 'The password has been reset successfully';
           },
-          applyCoupon: async (root: any, {coupon, amount}: {coupon: string, amount: number}, ctx: any) => {
-            let couponData = await this.platform.mercury.db.Coupon.list({code: coupon }, ctx.user);
-            if(!couponData?.length){
-              throw new GraphQLError("Invalid Coupon")
+          applyCoupon: async (
+            root: any,
+            { coupon, amount }: { coupon: string; amount: number },
+            ctx: any
+          ) => {
+            let couponData = await this.platform.mercury.db.Coupon.list(
+              { code: coupon },
+              ctx.user
+            );
+            if (!couponData?.length) {
+              throw new GraphQLError('Invalid Coupon');
             }
-            couponData =couponData[0];
-            if(couponData?.minOrderPrice > amount || !couponData?.active){
-              throw new GraphQLError("Coupon not applicable");
+            couponData = couponData[0];
+            if (couponData?.minOrderPrice > amount || !couponData?.active) {
+              throw new GraphQLError('Coupon not applicable');
             }
             const discountedAmount = couponData.discountValue;
             return discountedAmount;
-          }
+          },
         },
         Mutation: {
           addCartItem: async (
@@ -563,14 +570,14 @@ export class Ecommerce {
                 profile,
                 mobile,
               },
-              ctx?.user
+              { id: '1', profile: 'SystemAdmin' }
             );
             await mercuryDBInstance.Cart.create(
               {
                 customer: customer._id,
                 totalAmount: 0,
               },
-              ctx?.user
+              { id: '1', profile: 'SystemAdmin' }
             );
             return {
               id: customer._id,
@@ -589,7 +596,7 @@ export class Ecommerce {
             const mercuryDBInstance = this.platform.mercury.db;
             const customer = await mercuryDBInstance.Customer.get(
               { email },
-              ctx.user
+              { id: '1', profile: 'SystemAdmin' }
             );
 
             if (!customer?.id) {
@@ -601,34 +608,34 @@ export class Ecommerce {
             }
             const token = jwt.sign(
               { id: customer._id, email: customer.email },
-              this.options.JWT_SECRET || "",
+              this.options.JWT_SECRET || '',
               { expiresIn: '2d' }
             );
 
             const cart = await mercuryDBInstance.Cart.get(
               { cartToken, customer: customer?._id },
-              ctx.user
+              { id: '1', profile: 'SystemAdmin' }
             );
 
             if (!cart?.id && cartToken) {
               const anonymousCart = await mercuryDBInstance.Cart.get(
                 { cartToken },
-                ctx.user
+                { id: '1', profile: 'SystemAdmin' }
               );
               if (anonymousCart.id) {
                 const anonymousCartItemList =
                   await mercuryDBInstance.CartItem.list(
                     { cart: anonymousCart?.id },
-                    ctx.user
+                    { id: '1', profile: 'SystemAdmin' }
                   );
                 const customerCart = await mercuryDBInstance.Cart.get(
                   { customer: customer?._id },
-                  ctx.user
+                  { id: '1', profile: 'SystemAdmin' }
                 );
                 const customerCartItemList =
                   await mercuryDBInstance.CartItem.list(
                     { cart: customerCart?.id },
-                    ctx.user
+                    { id: '1', profile: 'SystemAdmin' }
                   );
                 const customerCartItemMap = new Map<string, any>();
                 customerCartItemList.forEach((item: any) => {
@@ -650,27 +657,27 @@ export class Ecommerce {
                         quantity: existingItem.quantity,
                         amount: existingItem.amount,
                       },
-                      ctx.user,
+                      { id: '1', profile: 'SystemAdmin' },
                       { skipHook: true }
                     );
-                    await mercuryDBInstance.CartItem.delete(
-                      anonItem._id,
-                      ctx.user
-                    );
+                    await mercuryDBInstance.CartItem.delete(anonItem._id, {
+                      id: '1',
+                      profile: 'SystemAdmin',
+                    });
                   } else {
                     anonItem.cart = customerCart._id;
                     await mercuryDBInstance.CartItem.update(
                       anonItem._id,
                       anonItem,
-                      ctx.user,
+                      { id: '1', profile: 'SystemAdmin' },
                       { skipHook: true }
                     );
                   }
                 }
-                await mercuryDBInstance.Cart.delete(
-                  anonymousCart._id,
-                  ctx.user
-                );
+                await mercuryDBInstance.Cart.delete(anonymousCart._id, {
+                  id: '1',
+                  profile: 'SystemAdmin',
+                });
               }
             }
 
