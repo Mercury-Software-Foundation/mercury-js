@@ -101,7 +101,7 @@ class RazorPay {
                 );
 
               const coupon =
-                await this.ecommerce.platform.mercury.db.Coupon.get(
+                await this.ecommerce.platform.mercury.db.Coupon.list(
                   { code },
                   ctx.user
                 );
@@ -114,7 +114,7 @@ class RazorPay {
                     shippingAddress,
                     totalAmount: amount,
                     discountedAmount,
-                    couponApplied: coupon?.id,
+                    couponApplied: coupon?.[0]?.id,
                     payment: payment.id,
                     status: 'Pending',
                   },
