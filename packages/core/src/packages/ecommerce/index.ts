@@ -123,7 +123,12 @@ export class Ecommerce {
         forgotPassword(email: String): String,
         verifyOTP(email: String, otp: String): String,
         resetPassword(email: String, newPassword: String, token:String):String,
-        applyCoupon(coupon:String, amount: Float): Float
+        applyCoupon(coupon:String, amount: Float): ApplyCouponResponse
+      }
+
+      type ApplyCouponResponse {
+        discountedAmount: Float
+        message: String
       }
 
       type SearchResponse{
@@ -447,7 +452,10 @@ export class Ecommerce {
               throw new GraphQLError('Coupon not applicable');
             }
             const discountedAmount = couponData.discountValue;
-            return discountedAmount;
+            return {
+              discountedAmount,
+              message: "Coupon Applied!!"
+            };
           },
         },
         Mutation: {
@@ -974,6 +982,7 @@ export class Ecommerce {
               date: new Date().toISOString(),
               invoice: invoice.id,
               orderId: `OD${Math.floor(10000 + Math.random() * 90000)}`,
+              shipmentStatus: "PACKAGING"
             },
             this.user
           );

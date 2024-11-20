@@ -80,7 +80,7 @@ class RazorPay {
           ) => {
             try {
               const order = this.razorPay.orders.create({
-                amount: amount * 100,
+                amount: (amount - discountedAmount) * 100,
                 currency: currency,
                 receipt: 'TEST_RECEIPT',
               });
@@ -88,7 +88,7 @@ class RazorPay {
               const payment =
                 await this.ecommerce.platform.mercury.db.Payment.create(
                   {
-                    amount: amount,
+                    amount: (amount - discountedAmount),
                     date: Date.now(),
                     gateway: 'RAZORPAY',
                     razorPayOrderId: order.id,
