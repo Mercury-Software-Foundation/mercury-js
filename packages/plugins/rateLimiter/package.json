@@ -1,6 +1,6 @@
 {
   "name": "@mercury-js/plugins/rateLimiter",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "dependencies": {},
   "type": "module",
   "private": true,
