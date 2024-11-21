@@ -18,6 +18,7 @@
         "commands": [
           "mkdir -p dist/packages/plugins",
           "cp packages/plugins/package.json dist/packages/plugins/",
+          "cp packages/plugins/README.md dist/packages/plugins/",
           "nx run historyTracking:build",
           "nx run redis:build",
           "nx run rateLimiter:build"
