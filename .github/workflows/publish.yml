@@ -3,7 +3,7 @@ name: Release and publish npm package
 on:
   push:
     branches:
-      - platform-mono-repo
+      - master
 
 jobs:
   publish-npm:

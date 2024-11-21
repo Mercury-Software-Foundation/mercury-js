@@ -3,7 +3,7 @@ name: Plugins Release
 on:
   push:
     branches:
-      - mercury-plugins
+      - master
 
 jobs:
   publish-npm:
