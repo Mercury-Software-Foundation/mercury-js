@@ -1,7 +1,0 @@
-{
-  "name": "@mercury-js/core/packages/extendModelTypes",
-  "private": false,
-  "main": "../../dist/cjs/packages/extendModelTypes/index.js",
-  "module": "../../dist/esm/packages/extendModelTypes/index.js",
-  "types": "./index.d.ts"
-}

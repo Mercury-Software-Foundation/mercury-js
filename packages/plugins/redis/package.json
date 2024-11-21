@@ -1,0 +1,12 @@
+{
+  "name": "@mercury-js/plugins/redis",
+  "version": "0.0.1",
+  "type": "module",
+  "files": [
+    "README.md",
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

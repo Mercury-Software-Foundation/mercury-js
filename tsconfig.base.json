@@ -10,12 +10,25 @@
     "importHelpers": true,
     "target": "es2015",
     "module": "esnext",
-    "lib": ["es2017", "dom"],
+    "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@mercury-platform/ui": ["ui/src/index.ts"]
+      "@mercury-js/core": ["packages/core/src/index.ts"],
+      "@mercury-js/core/packages/redis": [
+        "packages/core/packages/redis/src/index.ts"
+      ],
+      "@mercury-js/platform": ["packages/platform/src/index.ts"],
+      "@mercury-js/plugins": ["packages/plugins/src/index.ts"],
+      "@mercury-js/plugins/historyTracking": [
+        "packages/plugins/historyTracking/src/index.ts"
+      ],
+      "@mercury-js/plugins/rateLimiter": [
+        "packages/plugins/rateLimiter/src/index.ts"
+      ],
+      "@mercury-js/plugins/redis": ["packages/plugins/redis/src/index.ts"],
+      "@mercuy-js/plugins": ["packages/plugins/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

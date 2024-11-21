@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "files": [],
+  "include": [],
+    "typeRoots": ["src/types", "./node_modules/@types", "../node_modules/@types", "../../node_modules/@types"],
+    "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ],
+  "compilerOptions": {
+    "esModuleInterop": true
+  }
+}

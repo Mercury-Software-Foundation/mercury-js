@@ -1,0 +1,3 @@
+{
+    "jest.jestCommandLine": "./packages/core/node-modules/bin/jest --watch"
+}
