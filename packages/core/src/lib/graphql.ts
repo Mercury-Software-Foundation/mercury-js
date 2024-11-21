@@ -19,6 +19,7 @@ export const fieldTypeMap: { [key: string]: string } = {
   relationship: 'relationship',
   date: 'DateTime',
   float: 'Float',
+  mixed: 'JSON'
 };
 export class Mgraphql {
   // Generate graphql typedefs

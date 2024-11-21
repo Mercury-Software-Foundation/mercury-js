@@ -23,7 +23,7 @@
       "types": "./index.esm.d.ts"
     }
   },
-  "homepage": "https://mercuryjs.dev/",
+  "homepage": "https://mercuryjs.dev",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Mercury-Software-Foundation/mercury-js.git"
