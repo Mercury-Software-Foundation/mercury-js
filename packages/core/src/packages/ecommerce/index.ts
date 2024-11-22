@@ -876,6 +876,7 @@ export class Ecommerce {
                       quantity: cartItem.quantity,
                       productItem: cartItem.productItem,
                       pricePerUnit: cartItem.amount / (cartItem.quantity || 1),
+                      variants: cartItem.priceBookItem?.variants || []
                     },
                     this.user
                   );
@@ -971,6 +972,7 @@ export class Ecommerce {
                 productItem: buyNowCartItem.productItem,
                 pricePerUnit:
                   buyNowCartItem.amount / (buyNowCartItem.quantity || 1),
+                variants:buyNowCartItem.priceBookItem?.variants || []
               },
               this.user
             );

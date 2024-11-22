@@ -25,6 +25,11 @@ export const InvoiceLine: PModel = {
     pricePerUnit: {
       type: 'float',
     },
+    variants: {
+      type: "relationship",
+      ref: "Variant",
+      many: true
+    }
   },
   options: {
     historyTracking: false,
