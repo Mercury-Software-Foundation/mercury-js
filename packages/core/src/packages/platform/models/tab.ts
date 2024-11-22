@@ -30,6 +30,11 @@ export class Tab {
           required: true,
           unique: true,
         },
+        profiles: {
+          type: "relationship",
+          ref: "Profile",
+          many: true
+        },
         createdBy: {
           type: 'relationship',
           ref: 'User',

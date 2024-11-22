@@ -38,9 +38,10 @@ export class Model {
     this.addIndexes(); //Add indexes
     this.mongoSchema.plugin(mongooseBcrypt);
     this.mongoSchema.plugin(mongoosePaginateV2.default);
-    this.mongoModel =
-      models[this.model.name] ||
-      mongooseModel(this.model.name, this.mongoSchema);
+    if(models[this.model.name]) {
+      delete models[this.model.name];
+    }
+    this.mongoModel = mongooseModel(this.model.name, this.mongoSchema);
     if (this.mongoSchema.indexes && this.mongoSchema.indexes.length > 0) {
       this.mongoModel.ensureIndexes();
     }

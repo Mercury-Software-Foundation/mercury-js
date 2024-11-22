@@ -32,6 +32,10 @@ export class Component {
           required: true,
           many: true,
         },
+        managed: {
+          type: "boolean",
+          default: false
+        },
         createdBy: {
           type: 'relationship',
           ref: 'User',
