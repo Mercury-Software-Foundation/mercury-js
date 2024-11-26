@@ -3,13 +3,11 @@ import axios from 'axios';
 
 export class Msg91Adapter implements IMessageService {
   private apiKey: string;
-
   constructor(apiKey: string) {
     this.apiKey = apiKey;
   }
-
   async sendMessage(
-    to: { mobileNumber: string; [x: string]: any; }[],
+    to: { mobileNumber: string;[x: string]: any; }[],
     templateId: string
   ): Promise<{ success: boolean; message: string }> {
     const options = {
@@ -65,6 +63,14 @@ export class Msg91Adapter implements IMessageService {
         {
           recipients: to.map((recipient) => ({
             to: [{ name: recipient.firstName, email: recipient.email }],
+            cc: [
+              {
+                email: " d2c@slay.coffee"
+              },
+              {
+                email: "hemanth@slay.coffee"
+              },
+            ],
             variables: {
               firstName: recipient.firstName,
               secure_url: recipient.secure_url,
@@ -85,7 +91,6 @@ export class Msg91Adapter implements IMessageService {
       console.error(error);
       return { success: false, message: error?.response?.data?.message || 'Failed to send email' };
     }
-
     return { success: true, message: 'Sent Successfully!!' };
   }
 }
