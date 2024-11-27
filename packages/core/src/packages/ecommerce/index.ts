@@ -437,7 +437,7 @@ export class Ecommerce {
           },
           applyCoupon: async (
             root: any,
-            { coupon, amount }: { coupon: string; amount: number },
+            { coupon, amount = 0 }: { coupon: string; amount: number },
             ctx: any
           ) => {
             let couponData = await this.platform.mercury.db.Coupon.list(
@@ -448,13 +448,26 @@ export class Ecommerce {
               throw new GraphQLError('Invalid Coupon');
             }
             couponData = couponData[0];
-            if (couponData?.minOrderPrice > amount || !couponData?.active) {
+            if (!couponData?.active) {
               throw new GraphQLError('Coupon not applicable');
             }
-            const discountedAmount = couponData.discountValue;
+
+            if (couponData?.minOrderPrice || 0 > amount) {
+              throw new GraphQLError('Coupon not applicable');
+            }
+
+            let discountedAmount = 0;
+            if (couponData.discountType === 'FIXED_AMOUNT') {
+              discountedAmount = couponData.discountValue;
+            }
+
+            if (couponData.discountType === 'PERCENTAGE') {
+              discountedAmount = (amount * couponData.discountValue) / 100;
+            }
+
             return {
               discountedAmount,
-              message: "Coupon Applied!!"
+              message: 'Coupon Applied!!',
             };
           },
         },
@@ -876,7 +889,7 @@ export class Ecommerce {
                       quantity: cartItem.quantity,
                       productItem: cartItem.productItem,
                       pricePerUnit: cartItem.amount / (cartItem.quantity || 1),
-                      variants: cartItem.priceBookItem?.variants || []
+                      variants: cartItem.priceBookItem?.variants || [],
                     },
                     this.user
                   );
@@ -972,7 +985,7 @@ export class Ecommerce {
                 productItem: buyNowCartItem.productItem,
                 pricePerUnit:
                   buyNowCartItem.amount / (buyNowCartItem.quantity || 1),
-                variants:buyNowCartItem.priceBookItem?.variants || []
+                variants: buyNowCartItem.priceBookItem?.variants || [],
               },
               this.user
             );
@@ -984,7 +997,7 @@ export class Ecommerce {
               date: new Date().toISOString(),
               invoice: invoice.id,
               orderId: `OD${Math.floor(10000 + Math.random() * 90000)}`,
-              shipmentStatus: "PACKAGING"
+              shipmentStatus: 'PACKAGING',
             },
             this.user
           );
