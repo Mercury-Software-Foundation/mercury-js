@@ -22,6 +22,7 @@ import {
   Inventory,
   ProductSeo,
   CouponFormula,
+  ShipmentTracking,
 } from './models';
 import {
   getInvoiceHtml,
@@ -61,6 +62,7 @@ export default (config?: EcommerceConfig) => {
     ecommerce.cartHooks();
     ecommerce.paymentHooks();
     ecommerce.addressHooks();
+    ecommerce.shipmentTrackingHooks();
     await ecommerce.installPlugins();
   };
 };
@@ -103,6 +105,7 @@ export class Ecommerce {
       Inventory,
       ProductSeo,
       CouponFormula,
+      ShipmentTracking,
     ];
     const modelCreation = models.map((model) => {
       if (!(model.info.name in this.platform.mercury.db))
@@ -1062,6 +1065,27 @@ export class Ecommerce {
             thisPlatform.mercury,
             this.user
           );
+      }
+    );
+  }
+
+  async shipmentTrackingHooks() {
+    const thisPlatform = this.platform;
+
+    thisPlatform.mercury.hook.after(
+      'CREATE_SHIPMENTTRACKING_RECORD',
+      async function (this: any) {
+        await thisPlatform.mercury.db.Order.update(this.options?.args?.input?.order, {
+          shipmentStatus: this.options?.args?.input?.status || "PACKAGING"
+        }, this.user)
+      }
+    );
+    thisPlatform.mercury.hook.after(
+      'UPDATE_SHIPMENTTRACKING_RECORD',
+      async function (this: any) {
+        await thisPlatform.mercury.db.Order.update(this?.record?.order, {
+          shipmentStatus: this.options?.args?.input?.status || "PACKAGING"
+        }, this.user)
       }
     );
   }

@@ -4,7 +4,7 @@ export const Order: PModel = {
     name: 'Order',
     label: 'Order',
     description: 'Order model',
-    managed: true,
+    managed: false,
     prefix: 'Order',
   },
   fields: {
@@ -29,6 +29,13 @@ export const Order: PModel = {
       enumType: "string",
       enum: ["IN_TRANSIT", "PACKAGING", "DISPATCH", "DELIVERED"],
       default: "PACKAGING"
+    },
+    trackings: {
+      type: "virtual",
+      ref: "ShipmentTracking",
+      many: true,
+      localField: "_id",
+      foreignField: "order"
     }
   },
   options: {
