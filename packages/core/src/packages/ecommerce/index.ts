@@ -455,7 +455,7 @@ export class Ecommerce {
               throw new GraphQLError('Coupon not applicable');
             }
 
-            if (couponData?.minOrderPrice || 0 > amount) {
+            if (couponData?.minOrderPrice > amount) {
               throw new GraphQLError('Coupon not applicable');
             }
 
