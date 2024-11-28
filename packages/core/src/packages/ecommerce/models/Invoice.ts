@@ -52,6 +52,12 @@ export const Invoice: PModel = {
     document: {
       type: 'string',
     },
+    invoiceId: {
+      type: 'string',
+      unique: true,
+      default: () => `ID${Math.floor(10000 + Math.random() * 90000)}`
+    },
+
   },
   options: {
     historyTracking: false,

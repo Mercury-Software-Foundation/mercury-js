@@ -116,11 +116,12 @@ class RazorPay {
                     discountedAmount,
                     couponApplied: coupon?.[0]?.id,
                     payment: payment.id,
+                    invoiceId: `ID${Math.floor(10000 + Math.random() * 90000)}`,
                     status: 'Pending',
                   },
                   ctx.user
                 );
-
+              console.log(invoice, "initialPayment Invoice");
               return {
                 order: order,
                 paymentId: payment.id,
