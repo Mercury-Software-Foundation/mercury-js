@@ -4,8 +4,9 @@ export const Invoice: PModel = {
     name: 'Invoice',
     label: 'Invoice',
     description: 'Invoice model',
-    managed: true,
+    managed: false,
     prefix: 'INVOICE',
+    key: "invoiceId"
   },
   fields: {
     customer: {
