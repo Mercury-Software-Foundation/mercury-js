@@ -719,9 +719,7 @@ export class Ecommerce {
             { orderId, productItemId, variant }: { orderId: string; productItemId?: string, variant?: string },
             ctx: any
           ) => {
-            console.log(orderId, productItemId, variant, "Order ID");
             try {
-              // 1. Retrieve the order and its invoice
               const order = await this.platform.mercury.db.Order.get(
                 { _id: orderId },
                 ctx.user,
@@ -729,16 +727,11 @@ export class Ecommerce {
                   populate: [{ path: "invoice" }],
                 }
               );
-              console.log(order, "order");
-
               if (!order) {
                 throw new GraphQLError("Order not found");
               }
-
-              // 2. Retrieve all invoice lines associated with the order
               let invoiceLines;
               if (productItemId) {
-                // If productItemId is provided, fetch the specific invoice line
                 invoiceLines = await this.platform.mercury.db.InvoiceLine.list(
                   { invoice: order?.invoice?.id, productItem: productItemId },
                   ctx.user,
@@ -748,14 +741,12 @@ export class Ecommerce {
                     }],
                   },
                 );
-                console.log(invoiceLines, "ProductitembasesInvoicelines");
                 if (variant) {
                   invoiceLines = invoiceLines.filter((line: { variants: any[]; }) =>
                     line.variants.some(v => v.id === variant)
                   );
                 }
               } else {
-                // Otherwise, fetch all invoice lines
                 invoiceLines = await this.platform.mercury.db.InvoiceLine.list(
                   { invoice: order?.invoice?.id },
                   ctx.user,
@@ -763,35 +754,23 @@ export class Ecommerce {
                     populate: [{ path: "productItem" }],
                   }
                 );
-                console.log(invoiceLines, "OrderInvoicelines");
-
               }
-
               if (invoiceLines.length === 0) {
                 throw new GraphQLError("No product items found in the order");
               }
-
-              // 3. Loop through each invoice line to process deletion
               for (const invoiceLineToDelete of invoiceLines) {
-                // Retrieve product and variant details from the InvoiceLine
                 const inventoryQuery: any = {
                   product: invoiceLineToDelete.productItem.product,
                 };
 
                 if (invoiceLineToDelete?.variants?.length) {
                   inventoryQuery.variants = invoiceLineToDelete.variants;
-                  console.log(inventoryQuery, "Querryyyy");
                 }
-
-                // Fetch inventory directly using details from InvoiceLine
                 const inventory = await this.platform.mercury.db.Inventory.get(
                   inventoryQuery,
                   ctx.user
                 );
-                console.log(inventory, "inventory");
-
                 if (inventory) {
-                  // Restore inventory quantities
                   const updateInventory = await this.platform.mercury.db.Inventory.update(
                     inventory.id,
                     {
@@ -802,24 +781,16 @@ export class Ecommerce {
                     },
                     ctx.user
                   );
-                  console.log(updateInventory, "update Inventory");
                 }
-
-                // Delete the invoice line
                 const deletedInvoiceLine = await this.platform.mercury.db.InvoiceLine.delete(
                   invoiceLineToDelete.id,
                   ctx.user
                 );
-                console.log(deletedInvoiceLine, "DeletedInvoiceLine");
               }
-
-              // 4. Update invoice total amount after all deletions
               const updatedInvoiceLines = await this.platform.mercury.db.InvoiceLine.list(
                 { invoice: order.invoice.id },
                 ctx.user
               );
-              console.log(updatedInvoiceLines.length, "updatedInvoiceLines");
-
               const newTotalAmount = updatedInvoiceLines.reduce(
                 (total: number, line: any) => total + line.amount,
                 0
@@ -830,9 +801,6 @@ export class Ecommerce {
                 { totalAmount: newTotalAmount },
                 ctx.user
               );
-              console.log(updatedInvoice, "updateInvoice");
-
-              // 5. Cancel the order if no invoice lines remain
               if (updatedInvoiceLines.length === 0) {
                 const updatedOrder = await this.platform.mercury.db.Order.update(
                   order.id,
@@ -840,7 +808,6 @@ export class Ecommerce {
                   { id: '1', profile: 'SystemAdmin' }
 
                 );
-                console.log(updatedOrder, "OrderCancelled");
               }
               return {
                 message: productItemId
