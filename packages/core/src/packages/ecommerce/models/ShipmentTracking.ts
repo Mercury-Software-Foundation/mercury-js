@@ -12,7 +12,7 @@ export const ShipmentTracking: PModel = {
     update: {
         type: "string"
     },
-    shipmentStatus: {
+    status: {
       type: "enum",
       enumType: "string",
       enum: ["IN_TRANSIT", "PACKAGING", "DISPATCH", "DELIVERED"],

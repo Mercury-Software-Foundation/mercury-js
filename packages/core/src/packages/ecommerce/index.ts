@@ -1083,7 +1083,8 @@ export class Ecommerce {
     thisPlatform.mercury.hook.after(
       'UPDATE_SHIPMENTTRACKING_RECORD',
       async function (this: any) {
-        await thisPlatform.mercury.db.Order.update(this?.record?.order, {
+        
+        await thisPlatform.mercury.db.Order.update(this?.prevRecord?.order, {
           shipmentStatus: this.options?.args?.input?.status || "PACKAGING"
         }, this.user)
       }
