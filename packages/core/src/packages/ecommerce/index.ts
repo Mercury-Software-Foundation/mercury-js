@@ -119,8 +119,12 @@ export class Ecommerce {
             signUp(email: String!, password: String!, firstName: String!, lastName: String!, profile: String, mobile: String): Response
             addCartItem(cartToken: String, productItem:String!,priceBookItem:String!,customer:String,quantity:Int!, productPrice: Int!): AddCartItemResponse
             deleteOrderProducts(orderId:String,productItemId:String,variant:String):deleteOrderResponse
+            createCustomOrder(customerId: String,productitemId:String,shippingAddress: String,billingAddress: String,quantity:Int,pricePerUnit:Int,variant:String,paymentMethod:PaymentMethod): CustomOrderResponse
             }
-
+     type CustomOrderResponse{
+     id:String
+      message:String
+          }
       type Query {
         searchProducts(collectionName: String, searchText: String, sortBy: sortOptions , sortOrder: orderOptions): [SearchResponse],
         checkCartProductsAvailability(cart: String, cartItem: String): String,
@@ -148,11 +152,18 @@ export class Ecommerce {
         name
         amount
       }
- 
+      enum PaymentMethod{
+      OFFLINE
+      ONLINE
+      }
       enum orderOptions {
         asc
         desc
       }
+        type CustomOrderResponse{
+        id:String
+        message:String
+        }
       type loginResponse {
             id: String,
             profile: String,
@@ -707,7 +718,6 @@ export class Ecommerce {
                 });
               }
             }
-
             return {
               id: customer._id,
               profile: customer.profile,
@@ -806,7 +816,6 @@ export class Ecommerce {
                   order.id,
                   { shipmentStatus: "CANCELLED" },
                   { id: '1', profile: 'SystemAdmin' }
-
                 );
               }
               return {
@@ -817,6 +826,162 @@ export class Ecommerce {
             } catch (error: any) {
               console.error("Error deleting order product items:", error);
               throw new GraphQLError(`Failed to delete product items: ${error.message}`);
+            }
+          },
+          createCustomOrder: async (
+            root: any,
+            {
+              customerId,
+              productitemId,
+              shippingAddress,
+              billingAddress,
+              quantity,
+              paymentMethod,
+              pricePerUnit,
+              variant
+            }: {
+              customerId: string;
+              productitemId: string;
+              shippingAddress: string;
+              billingAddress: string;
+              paymentMethod: string;
+              quantity: number;
+              pricePerUnit: number;
+              variant?: string;
+            },
+            ctx: any
+          ) => {
+            try {
+              const customer = await this.platform.mercury.db.Customer.get(
+                { _id: customerId },
+                ctx.user
+              );
+              if (!customer) {
+                throw new GraphQLError('Customer not found');
+              }
+
+              const productItem = await this.platform.mercury.db.ProductItem.get(
+                { _id: productitemId },
+                ctx.user,
+                {
+                  populate: [{ path: 'product' }]
+                }
+              );
+              if (!productItem) {
+                throw new GraphQLError('Product not found');
+              }
+              if (variant) {
+                const variantData = await this.platform.mercury.db.Variant.get(
+                  { _id: variant },
+                  ctx.user
+                );
+                if (!variantData) {
+                  throw new GraphQLError('Invalid variant specified');
+                }
+                const priceBookItem = await this.platform.mercury.db.PriceBookItem.get(
+                  {
+                    product: productItem.product,
+                    variants: variant
+                  },
+                  ctx.user
+                );
+                if (!priceBookItem) {
+                  throw new GraphQLError('No price configuration found for this product variant combination');
+                }
+                if (priceBookItem.offerPrice && priceBookItem.offerPrice !== pricePerUnit) {
+                  throw new GraphQLError('Invalid price for this product variant combination');
+                }
+              }
+              const inventoryQuery: any = {
+                product: productItem.product
+              };
+              if (variant) {
+                inventoryQuery.variants = [variant];
+              }
+              const inventory = await this.platform.mercury.db.Inventory.get(
+                inventoryQuery,
+                ctx.user
+              );
+              if (!inventory) {
+                throw new GraphQLError('Inventory not found for the specified product/variant combination');
+              }
+              if (quantity > inventory.totalQuantity) {
+                throw new GraphQLError(
+                  `Insufficient inventory for product ${productItem.name}. Available: ${inventory?.totalQuantity || 0}`
+                );
+              }
+              const totalAmount = Number(quantity) * Number(pricePerUnit);
+              if (isNaN(totalAmount) || totalAmount <= 0) {
+                throw new GraphQLError('Invalid total amount');
+              }
+
+              if (paymentMethod === "OFFLINE") {
+                const payment = await this.platform.mercury.db.Payment.create(
+                  {
+                    amount: totalAmount,
+                    status: 'PENDING',
+                    paymentMethod: 'OFFLINE',
+                    customer: customerId,
+                  },
+                  ctx.user
+                );
+                console.log(payment, "payment");
+                const invoice = await this.platform.mercury.db.Invoice.create(
+                  {
+                    customer: customerId,
+                    date: new Date().toISOString(),
+                    status: 'Pending',
+                    invoiceId: `ID${Math.floor(10000 + Math.random() * 90000)}`,
+                    shippingAddress,
+                    billingAddress: billingAddress || shippingAddress,
+                    totalAmount,
+                    payment: payment.id
+                  },
+                  ctx.user
+                );
+                const invoiceLine = await this.platform.mercury.db.InvoiceLine.create(
+                  {
+                    invoice: invoice.id,
+                    amount: totalAmount,
+                    quantity: quantity,
+                    productItem: productitemId,
+                    pricePerUnit: pricePerUnit,
+                    variants: variant ? [variant] : [],
+                  },
+                  ctx.user
+                );
+                const order = await this.platform.mercury.db.Order.create(
+                  {
+                    customer: customerId,
+                    date: new Date().toISOString(),
+                    invoice: invoice.id,
+                    orderId: `OD${Math.floor(10000 + Math.random() * 90000)}`,
+                    shipmentStatus: 'PACKAGING',
+                    paymentStatus: 'PENDING',
+                    paymentMethod: 'OFFLINE'
+                  },
+                  ctx.user
+                );
+                await this.platform.mercury.db.Inventory.update(
+                  inventory.id,
+                  {
+                    totalQuantity: inventory.totalQuantity - quantity,
+                    bookedQuantity: inventory.bookedQuantity + quantity,
+                  },
+                  ctx.user
+                );
+
+                return {
+                  id: order.id,
+                  message: 'Custom order created successfully with COD payment method'
+                };
+              } else {
+                return {
+                  message: 'Payment initiated. Please complete the payment process.',
+                };
+              }
+            } catch (error: any) {
+              throw new GraphQLError(`Failed to create custom order: ${error.message}`);
             }
           }
         },
@@ -1087,7 +1252,6 @@ export class Ecommerce {
                 this.user
               );
             }
-
             await thisPlatform.mercury.db.InvoiceLine.create(
               {
                 invoice: invoice.id,
