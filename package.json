@@ -40,6 +40,7 @@
     "graphql-scalars": "^1.20.1",
     "graphql-shield": "^7.6.5",
     "jsonwebtoken": "^9.0.2",
+    "jwt-decode": "^4.0.0",
     "kareem": "^2.5.1",
     "localforage": "^1.10.0",
     "lodash": "^4.17.21",

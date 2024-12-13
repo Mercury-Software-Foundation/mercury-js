@@ -551,6 +551,7 @@ export class Ecommerce {
                 quantity,
               });
               newToken = token;
+              await recalculateTotalAmountOfCart(cart._id, this.platform.mercury, ctx.user);
             } else if (!customer && cartToken) {
               const cart = await mercuryInstance.Cart.get(
                 { cartToken },
