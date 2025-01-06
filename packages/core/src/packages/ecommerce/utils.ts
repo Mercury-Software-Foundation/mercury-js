@@ -47,7 +47,39 @@ export const handleAddToCartForExistingCart = async (
 
   await recalculateTotalAmountOfCart(cartId, mercury, user);
 };
-
+export const applyCoupon = async (
+  coupon: string,
+  amount: number,
+  mercury: Mercury,
+  user: any
+): Promise<{ discountedAmount: number; message: string }> => {
+  let couponData = await mercury.db.Coupon.list({ code: coupon }, user);
+  if (!couponData?.length) {
+    throw new GraphQLError('Invalid Coupon');
+  }
+  couponData = couponData[0];
+  if (!couponData?.active) {
+    throw new GraphQLError('Coupon is inactive or expired');
+  }
+  if (amount < couponData.minOrderPrice) {
+    throw new GraphQLError(
+      `Coupon not applicable. Minimum order amount is ${couponData.minOrderPrice}`
+    );
+  }
+  let discountedAmount = 0;
+  if (couponData.discountType === 'FIXED_AMOUNT') {
+    discountedAmount = couponData.discountValue;
+  } else if (couponData.discountType === 'PERCENTAGE') {
+    discountedAmount = (amount * couponData.discountValue) / 100;
+    if (discountedAmount > couponData.maxDiscountValue) {
+      discountedAmount = couponData.maxDiscountValue;
+    }
+  }
+  return {
+    discountedAmount,
+    message: 'Coupon Applied!!',
+  };
+};
 export const recalculateTotalAmountOfCart = async (
   cart: any,
   mercury: Mercury,
@@ -166,7 +198,7 @@ export const sendOrderConfirmationMail = async (
       name: firstName || '',
       firstName: firstName || '',
       secure_url: secure_url || '',
-      order_id: order_id || ""
+      order_id: order_id || '',
     },
   ];
   const EmailFrom = {
@@ -179,7 +211,7 @@ export const sendOrderConfirmationMail = async (
       mobileNumber: mobile,
       firstName: firstName || '',
       secure_url: secure_url || '',
-      order_id: order_id || ''
+      order_id: order_id || '',
     },
   ];
 

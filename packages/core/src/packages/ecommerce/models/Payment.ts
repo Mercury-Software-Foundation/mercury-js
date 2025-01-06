@@ -47,7 +47,7 @@ export const Payment: PModel = {
     },
     status: {
       type: 'enum',
-      enum: ['SUCCESS', 'FAILURE','PENDING'],
+      enum: ['SUCCESS', 'FAILURE','PENDING',"REFUNDED"],
       enumType: 'string',
     },
     mode: {
