@@ -79,7 +79,7 @@ class RazorPay {
             ctx: any
           ) => {
             try {
-              const order = this.razorPay.orders.create({
+              const order = await this.razorPay.orders.create({
                 amount: (amount - discountedAmount) * 100,
                 currency: currency,
                 receipt: 'TEST_RECEIPT',
