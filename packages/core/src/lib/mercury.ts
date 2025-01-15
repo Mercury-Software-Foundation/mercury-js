@@ -88,6 +88,7 @@ export class Mercury {
     );
     // Add the model to the list of models
     if (options.update) {
+      // What if the model is not present and by default they passed the update field - ?
       // If the model is an update model, find the existing model and update it
       const index = this.list.findIndex((m) => m.name === name);
       this.list[index] = model;

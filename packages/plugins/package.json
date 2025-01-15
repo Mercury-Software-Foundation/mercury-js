@@ -1,11 +1,12 @@
 {
   "name": "@mercury-js/plugins",
-  "version": "0.0.9",
+  "version": "1.0.2",
   "files": [
     "README.md",
     "historyTracking",
     "redis",
-    "rateLimiter"
+    "rateLimiter",
+    "recordOwner"
   ],
   "dependencies": {},
   "publishConfig": {
@@ -26,6 +27,10 @@
       "require": "./rateLimiter/index.cjs.js",
       "import": "./rateLimiter/index.esm.js",
       "types": "./rateLimiter/index.esm.d.ts"
+    },
+    "./recordOwner": {
+      "require": "./recordOwner/index.cjs.js",
+      "import": "./recordOwner/index.esm.js"
     }
   }
 }
