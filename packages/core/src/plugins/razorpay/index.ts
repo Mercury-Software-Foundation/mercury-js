@@ -39,8 +39,8 @@ class RazorPay {
     this.ecommerce.platform.mercury.addGraphqlSchema(
       `
       type Mutation {
-        initiatePayment(amount: Float, discountedAmount: Float, code: String, currency: String, shippingAddress: String!, billingAddress: String!, customer: String!): paymentOrder
-        capturePayment(paymentId: String, razorpayPaymentId: String, razorpayOrderId: String, razorPaySignature: String, cartItem: String): String
+        initiatePayment(amount: Float, discountedAmount: Float, code: String, currency: String, shippingAddress: String!, billingAddress: String!, customer: String!, isCod: Boolean): paymentOrder
+        capturePayment(paymentId: String, razorpayPaymentId: String, razorpayOrderId: String, razorPaySignature: String, cartItem: String, isCod: Boolean): String
       }
 
       type paymentOrder {
@@ -67,6 +67,7 @@ class RazorPay {
               shippingAddress,
               billingAddress,
               customer,
+              isCod = false,
             }: {
               amount: number;
               discountedAmount: number;
@@ -75,30 +76,48 @@ class RazorPay {
               shippingAddress: string;
               billingAddress: string;
               customer: string;
+              isCod: boolean;
             },
             ctx: any
           ) => {
             try {
-              const order = await this.razorPay.orders.create({
-                amount: (amount - discountedAmount) * 100,
-                currency: currency,
-                receipt: 'TEST_RECEIPT',
-              });
+              let payment;
+              let order;
+              if (!isCod) {
+                order = await this.razorPay.orders.create({
+                  amount: (amount - discountedAmount) * 100,
+                  currency: currency,
+                  receipt: 'TEST_RECEIPT',
+                });
 
-              const payment =
-                await this.ecommerce.platform.mercury.db.Payment.create(
-                  {
-                    amount: (amount - discountedAmount),
-                    date: Date.now(),
-                    gateway: 'RAZORPAY',
-                    razorPayOrderId: order.id,
-                    razorPayOrderStatus: order.status,
-                    attempts: order.attempts,
-                    currency: order.currency,
-                  },
-                  ctx.user,
-                  {}
-                );
+                payment =
+                  await this.ecommerce.platform.mercury.db.Payment.create(
+                    {
+                      amount: amount - discountedAmount,
+                      date: Date.now(),
+                      gateway: 'RAZORPAY',
+                      razorPayOrderId: order.id,
+                      razorPayOrderStatus: order.status,
+                      attempts: order.attempts,
+                      currency: order.currency,
+                      method: 'ONLINE',
+                    },
+                    ctx.user,
+                    {}
+                  );
+              } else {
+                payment =
+                  await this.ecommerce.platform.mercury.db.Payment.create(
+                    {
+                      amount: amount - discountedAmount,
+                      date: Date.now(),
+                      method: 'OFFLINE',
+                      status: 'PENDING',
+                    },
+                    ctx.user,
+                    {}
+                  );
+              }
 
               const coupon =
                 await this.ecommerce.platform.mercury.db.Coupon.list(
@@ -121,12 +140,17 @@ class RazorPay {
                   },
                   ctx.user
                 );
-              console.log(invoice, "initialPayment Invoice");
-              return {
-                order: order,
-                paymentId: payment.id,
-                invoice: invoice.id,
-              };
+
+              return !isCod
+                ? {
+                    order: order,
+                    paymentId: payment.id,
+                    invoice: invoice.id,
+                  }
+                : {
+                    paymentId: payment.id,
+                    invoice: invoice.id,
+                  };
             } catch (error: any) {
               throw new GraphQLError(error);
             }
@@ -139,47 +163,64 @@ class RazorPay {
               razorpayOrderId,
               razorPaySignature,
               cartItem,
+              isCod = false,
             }: {
               paymentId: string;
               razorpayPaymentId: string;
               razorpayOrderId: string;
               razorPaySignature: string;
               cartItem?: string;
+              isCod: boolean;
             },
             ctx: any
           ) => {
             try {
               const PaymentSchema = this.ecommerce.platform.mercury.db.Payment;
-              const RazorpayPayment = await this.razorPay.payments.fetch(
-                razorpayPaymentId
-              );
-              const RazorPayOrder = await this.razorPay.orders.fetch(
-                razorpayOrderId
-              );
-              const isPaymentValid = validatePaymentVerification(
-                { order_id: razorpayOrderId, payment_id: razorpayPaymentId },
-                razorPaySignature,
-                process.env.RAZOR_PAY_SECRET_KEY || ''
-              );
-              const status = isPaymentValid ? 'SUCCESS' : 'FAILURE';
-              await PaymentSchema.update(
-                paymentId,
-                {
-                  mode: RazorpayPayment.method,
-                  razorPayPaymentId: razorpayPaymentId,
-                  razorPayPaymentStatus: RazorpayPayment.status,
-                  razorPaySignature: razorPaySignature,
-                  razorPayOrderStatus: RazorPayOrder.status,
-                  attempts: RazorPayOrder.attempts,
-                  status: status,
-                },
-                ctx.user,
-                {
-                  buyNowCartItemId: cartItem,
-                }
-              );
 
-              if (isPaymentValid) return 'Payment is successful';
+              if (!isCod) {
+                const RazorpayPayment = await this.razorPay.payments.fetch(
+                  razorpayPaymentId
+                );
+                const RazorPayOrder = await this.razorPay.orders.fetch(
+                  razorpayOrderId
+                );
+                const isPaymentValid = validatePaymentVerification(
+                  { order_id: razorpayOrderId, payment_id: razorpayPaymentId },
+                  razorPaySignature,
+                  process.env.RAZOR_PAY_SECRET_KEY || ''
+                );
+                const status = isPaymentValid ? 'SUCCESS' : 'FAILURE';
+                await PaymentSchema.update(
+                  paymentId,
+                  {
+                    mode: RazorpayPayment.method,
+                    razorPayPaymentId: razorpayPaymentId,
+                    razorPayPaymentStatus: RazorpayPayment.status,
+                    razorPaySignature: razorPaySignature,
+                    razorPayOrderStatus: RazorPayOrder.status,
+                    attempts: RazorPayOrder.attempts,
+                    status: status,
+                  },
+                  ctx.user,
+                  {
+                    buyNowCartItemId: cartItem,
+                  }
+                );
+                if (isPaymentValid) return 'Payment is successful';
+              } else {
+                await PaymentSchema.update(
+                  paymentId,
+                  {
+                    mode: 'COD',
+                    status: 'SUCCESS',
+                  },
+                  ctx.user,
+                  {
+                    buyNowCartItemId: cartItem,
+                  }
+                );
+                return 'Order successfully created with Cash On Delivery option.';
+              }
               throw new GraphQLError('Invalid Payment Signature');
             } catch (error: any) {
               throw new GraphQLError(error.message);

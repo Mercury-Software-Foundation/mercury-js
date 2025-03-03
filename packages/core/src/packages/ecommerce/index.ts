@@ -39,6 +39,7 @@ import jwt from 'jsonwebtoken';
 import { Invoice } from './models/Invoice';
 import { InvoiceLine } from './models/InvoiceLine';
 import { Msg91Adapter } from './Adapters/MessageService/Msg91Adapter';
+import _ from 'lodash';
 
 type Options = {
   SENDER_EMAIL?: string;
@@ -328,6 +329,12 @@ export class Ecommerce {
                         inventoryQuery,
                         ctx.user
                       );
+
+                    if (_.isEmpty(inventory)) {
+                      throw new GraphQLError(
+                        'Inventory not found for this product'
+                      );
+                    }
                     if (cartItem.quantity > inventory?.totalQuantity) {
                       throw new GraphQLError(
                         `"${cartItem.productItem.name}" quantity exceeds available stock (${inventory.totalQuantity}).`
@@ -359,6 +366,9 @@ export class Ecommerce {
                 inventoryQuery,
                 ctx.user
               );
+              if (_.isEmpty(inventory)) {
+                throw new GraphQLError('Inventory not found for this product');
+              }
               if (cartItemData.quantity > inventory?.totalQuantity) {
                 throw new GraphQLError(
                   `Quantity exceeds available stock (${inventory.totalQuantity}).`
@@ -520,7 +530,9 @@ export class Ecommerce {
               },
               ctx.user
             );
-
+            if (_.isEmpty(inventory)) {
+              throw new GraphQLError('Inventory not found for this product');
+            }
             if (quantity > inventory.totalQuantity) {
               throw new GraphQLError(
                 `Quantity exceeds available stock (${inventory.totalQuantity}).`
@@ -915,64 +927,33 @@ export class Ecommerce {
                   }
                 }
                 const inventoryQuery: any = {
-                  product: productItem.product,
+                  product: productItem.product.id,
                   ...(variants.length > 0 && { variants: { $in: variants } }),
                 };
                 const inventory = await this.platform.mercury.db.Inventory.get(
                   inventoryQuery,
                   ctx.user
                 );
-                if (Array.isArray(inventory)) {
-                  const insufficientInventory = variants.some((variant) => {
-                    const inv = inventory.find((i) => i.variant === variant);
-                    if (!inv || inv.totalQuantity < quantity) {
-                      const variantName = inv?.variantName || 'Unknown Variant';
-                      throw new GraphQLError(
-                        `Insufficient inventory for variant: ${variantName}. Requested: ${quantity}, Available: ${
-                          inv?.totalQuantity || 0
-                        }`
-                      );
-                    }
-                    return false;
-                  });
-                  if (insufficientInventory) continue;
-                } else {
-                  if (!inventory || inventory.totalQuantity < quantity) {
-                    throw new GraphQLError(
-                      `Insufficient inventory for product: ${
-                        productItem.name
-                      }. Requested: ${quantity}, Available: ${
-                        inventory?.totalQuantity || 0
-                      }`
-                    );
-                  }
-                }
-                if (Array.isArray(inventory)) {
-                  for (const variant of variants) {
-                    const inv = inventory.find((i) => i.variant === variant);
-                    if (inv) {
-                      await this.platform.mercury.db.Inventory.update(
-                        inv.id,
-                        {
-                          totalQuantity: inv.totalQuantity - quantity,
-                          bookedQuantity: inv.bookedQuantity + quantity,
-                        },
-                        ctx.user
-                      );
-                    }
-                  }
-                } else {
-                  await this.platform.mercury.db.Inventory.update(
-                    inventory.id,
-                    {
-                      totalQuantity: inventory.totalQuantity - quantity,
-                      bookedQuantity: inventory.bookedQuantity + quantity,
-                    },
-                    ctx.user
+                if (!inventory || inventory.totalQuantity < quantity) {
+                  throw new GraphQLError(
+                    `Insufficient inventory for product: ${
+                      productItem.name
+                    }. Requested: ${quantity}, Available: ${
+                      inventory?.totalQuantity || 0
+                    }`
                   );
                 }
+
+                await this.platform.mercury.db.Inventory.update(
+                  inventory.id,
+                  {
+                    totalQuantity: inventory.totalQuantity - quantity,
+                    bookedQuantity: inventory.bookedQuantity + quantity,
+                  },
+                  ctx.user
+                );
+
                 const itemTotal = Number(quantity) * Number(pricePerUnit);
-                console.log(itemTotal, 'itemTotal');
                 if (isNaN(itemTotal) || itemTotal <= 0) {
                   throw new GraphQLError('Invalid item total amount');
                 }
@@ -1010,7 +991,8 @@ export class Ecommerce {
                     amount: totalAmount,
                     status: 'PENDING',
                     paymentMethod: 'OFFLINE',
-                    customer: customerId,
+                    mode: "COD",
+                    date: Date.now(),
                   },
                   ctx.user
                 );
@@ -1022,7 +1004,7 @@ export class Ecommerce {
                     invoiceId: `ID${Math.floor(10000 + Math.random() * 90000)}`,
                     shippingAddress,
                     billingAddress: finalBillingAddress,
-                    totalAmount,
+                    totalAmount: totalAmount + discountAmount,
                     discountedAmount: discountAmount,
                     couponApplied: couponId,
                     payment: payment.id,
@@ -1041,7 +1023,7 @@ export class Ecommerce {
                     date: new Date().toISOString(),
                     invoice: invoice.id,
                     orderId: `OD${Math.floor(10000 + Math.random() * 90000)}`,
-                    shipmentStatus: 'PACKAGING',
+                    shipmentStatus: 'GENERATED',
                   },
                   ctx.user
                 );
@@ -1343,7 +1325,7 @@ export class Ecommerce {
               date: new Date().toISOString(),
               invoice: invoice.id,
               orderId: `OD${Math.floor(10000 + Math.random() * 90000)}`,
-              shipmentStatus: 'PACKAGING',
+              shipmentStatus: 'GENERATED',
             },
             this.user
           );
