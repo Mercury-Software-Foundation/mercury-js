@@ -894,7 +894,9 @@ export class Ecommerce {
               if (!customer) {
                 throw new GraphQLError('Customer not found');
               }
+
               let totalAmount = 0;
+              
               const invoiceLines = [];
               for (const item of productItems) {
                 const {
@@ -966,6 +968,7 @@ export class Ecommerce {
                   variants,
                 });
               }
+
               let discountAmount = 0;
               let couponId = null;
               if (coupon) {
@@ -976,9 +979,11 @@ export class Ecommerce {
                   ctx.user
                 );
                 discountAmount = couponResult.discountedAmount;
-                couponId = coupon ? coupon : null;
+                const couponData = await this.platform.mercury.db.Coupon.get({code: coupon}, ctx.user);
+                couponId = coupon ? couponData?.id : null;
                 totalAmount -= discountAmount;
               }
+              
               const finalBillingAddress = isBillingSameAsShipping
                 ? shippingAddress
                 : billingAddress;
@@ -989,7 +994,7 @@ export class Ecommerce {
                 const payment = await this.platform.mercury.db.Payment.create(
                   {
                     amount: totalAmount,
-                    status: 'PENDING',
+                    status: 'SUCCESS',
                     paymentMethod: 'OFFLINE',
                     mode: "COD",
                     date: Date.now(),
@@ -1000,7 +1005,7 @@ export class Ecommerce {
                   {
                     customer: customerId,
                     date: new Date().toISOString(),
-                    status: 'Pending',
+                    status: 'Paid',
                     invoiceId: `ID${Math.floor(10000 + Math.random() * 90000)}`,
                     shippingAddress,
                     billingAddress: finalBillingAddress,
