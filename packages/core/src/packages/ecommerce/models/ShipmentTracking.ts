@@ -15,7 +15,7 @@ export const ShipmentTracking: PModel = {
     status: {
       type: "enum",
       enumType: "string",
-      enum: ["IN_TRANSIT", "PACKAGING", "DISPATCH", "DELIVERED"],
+      enum: ["IN_TRANSIT", "PACKAGING", "DISPATCH", "DELIVERED", "GENERATED"],
       default: "PACKAGING"
     },
     order: {

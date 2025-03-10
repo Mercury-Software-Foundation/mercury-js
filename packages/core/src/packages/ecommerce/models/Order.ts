@@ -27,8 +27,11 @@ export const Order: PModel = {
     shipmentStatus: {
       type: "enum",
       enumType: "string",
-      enum: ["IN_TRANSIT", "PACKAGING", "DISPATCH", "DELIVERED", "CANCELLED"],
-      default: "PACKAGING"
+      enum: ["IN_TRANSIT", "PACKAGING", "DISPATCH", "DELIVERED", "CANCELLED", "GENERATED"],
+      default: "GENERATED"
+    },
+    shipRocketShipmentId: {
+      type: "string" 
     },
     trackings: {
       type: "virtual",
