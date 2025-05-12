@@ -1,7 +1,7 @@
 import { RedisCacheConfig } from "../types/redisCache";
 import { IPlugin } from "@mercury-js/core";
 import type { Mercury } from "@mercury-js/core";
-import { RedisClientType, createClient, SchemaFieldTypes } from 'redis';
+import { RedisClientType, createClient, SchemaFieldTypes, SetOptions } from 'redis';
 
 // Module augmentation for Mercury type
 declare module "@mercury-js/core" {
@@ -119,8 +119,8 @@ export class RedisCache implements IPlugin {
   }
 
   @AfterHook
-  async set(key: string, value: string) {
-    await this.client.set(key, value);
+  async set(key: string, value: string, options?: SetOptions) {
+    await this.client.set(key, value, options);
   }
 
   async delete(key: string) {

@@ -8,5 +8,8 @@
   ],
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "redis": "^4.6.11"
   }
 }
