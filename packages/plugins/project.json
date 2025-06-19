@@ -21,7 +21,8 @@
           "cp packages/plugins/README.md dist/packages/plugins/",
           "nx run historyTracking:build",
           "nx run redis:build",
-          "nx run rateLimiter:build"
+          "nx run rateLimiter:build",
+          "nx run recordOwner:build"
         ],
         "parallel": false
       }

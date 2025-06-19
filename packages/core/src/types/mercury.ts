@@ -36,7 +36,7 @@ export type TField = {
   [x: string]: any;
 };
 
-export type TOptions = {
+export interface TOptions {
   historyTracking: boolean;
   update?: boolean;
   private?: boolean;
