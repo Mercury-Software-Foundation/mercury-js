@@ -125,6 +125,20 @@ export class Mercury {
       );
       this.resolversArr = mergeResolvers([this.resolversArr, createResolvers]);
     }
+
+    // Create HistoryTrackingModel
+    if (options.historyTracking) {
+      this.hook.execAfter(
+        "CREATE_HISTORYTRACKING_MODEL",
+        model as THookParams,
+        [],
+        (error: any) => {
+          if (error) {
+            throw error;
+          }
+        }
+      );
+    }
   }
 
   public deleteModel(model: string) {

@@ -1,6 +1,6 @@
 {
   "name": "@mercury-js/plugins",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "files": [
     "README.md",
     "historyTracking",

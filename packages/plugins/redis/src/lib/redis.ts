@@ -63,7 +63,7 @@ export class RedisCache implements IPlugin {
   public models: any[];
   // private isInitialized: boolean = false;
 
-    constructor(config?: RedisCacheConfig) {
+  constructor(config?: RedisCacheConfig) {
     this.prefix = config?.prefix || "redis";
     this.installed = false;
     this.models = [];
@@ -123,6 +123,7 @@ export class RedisCache implements IPlugin {
     await this.client.set(key, value, options);
   }
 
+  @AfterHook
   async delete(key: string) {
     await this.client.del(key);
   }
