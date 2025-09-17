@@ -52,16 +52,16 @@ export class RecordOwner implements IPlugin {
         mercury.hook.before(
           `CREATE_${this.name.toUpperCase()}_RECORD`,
           function (this: any) {
-            this.data['createdBy'] = this.user.id;
-            this.data['updatedBy'] = this.user.id;
-            this.data['owner'] = this.user.id;
+            this.data['createdBy'] = this.data.createdBy ?? this.options.ctx.user?.id ?? this.user.id;
+            this.data['updatedBy'] = this.data.updatedBy ?? this.options.ctx.user?.id ?? this.user.id;
+            this.data['owner'] = this.data.owner ?? this.options.ctx.user?.id ?? this.user.id;
           }
         );
 
         mercury.hook.before(
           `UPDATE_${this.name.toUpperCase()}_RECORD`,
           function (this: any) {
-            this.data['updatedBy'] = this.user.id;
+            this.data['updatedBy'] = this.data.updatedBy ?? this.options.ctx.user?.id ?? this.user.id;
           }
         );
       }
